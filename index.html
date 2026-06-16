@@ -344,6 +344,7 @@ function thumbSVG(type){
 const PAGE_W=1000, PAGE_H=1414;   // resolución interna de la hoja (fija)
 
 let view={scale:1, tx:0, ty:0};   // transform del plano
+let viewInitialized=false;         // ¿ya se hizo el fit inicial?
 let drawing=false, curStroke=[], drawCtx=null, drawingPointerId=null, panning=null;
 let penSeen=false;                 // ¿se detectó Apple Pencil?
 let penMode='auto';                // auto | pen-only | allow-touch
@@ -446,11 +447,16 @@ function setupEditor(nb,pageIndex){
   // Zoom con rueda (trackpad/mouse en PC)
   viewport.addEventListener('wheel',onWheel,{passive:false});
 
-  // Ajustar zoom inicial DESPUÉS de que el layout esté listo.
-  // Sin esto, viewport.clientWidth puede ser 0 y romper el scale.
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{ fitToScreen(); });
-  });
+  // Ajustar zoom inicial SOLO la primera vez que se abre el cuaderno.
+  // Si ya hay un zoom/posición fijado por el usuario, lo conservamos.
+  if(!viewInitialized){
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{ fitToScreen(); viewInitialized=true; });
+    });
+  }else{
+    // Reaplicar el transform guardado (no resetear)
+    requestAnimationFrame(()=>applyTransform());
+  }
 
   updatePenModeUI();
 }
@@ -547,7 +553,8 @@ function onPointerMove(e){
     return;
   }
 
-  if(drawing && isDrawingPointer(e)){
+  // DIBUJANDO: continuar con el MISMO puntero que inició el trazo
+  if(drawing && e.pointerId===drawingPointerId){
     e.preventDefault();
     const p=screenToPage(e.clientX,e.clientY);
     if(curStroke.length>0){
@@ -558,6 +565,7 @@ function onPointerMove(e){
       drawCtx.beginPath();drawCtx.moveTo(mx,my);
     }
     curStroke.push({x:p.x,y:p.y});
+    showDebug(`dibujando: ${curStroke.length} pts | scale ${view.scale.toFixed(2)}`);
     return;
   }
   // Gesto con dedos
@@ -571,14 +579,19 @@ function onPointerUp(e){
   // Fin de herramienta mano
   if(panning){ panning=null; return; }
 
-  if(drawing && (e.pointerType==='pen'||e.pointerType==='mouse'||(e.pointerType==='touch'&&!penSeen&&penMode!=='pen-only'))){
+  // Fin de dibujo: si es el puntero que estaba dibujando
+  if(drawing && e.pointerId===drawingPointerId){
     drawing=false;
+    drawingPointerId=null;
     if(curStroke.length>=2){
       const nb=S.notebooks.find(n=>n.id===S.openNb);
       const key=`${nb.id}_p${S.currentPage}`;
       if(!STROKES[key])STROKES[key]=[];
       STROKES[key].push([...curStroke]);
       saveStrokes();
+      showDebug(`guardado: ${curStroke.length} pts ✓`);
+    }else{
+      showDebug(`trazo muy corto (${curStroke.length} pts)`);
     }
     curStroke=[];
   }
@@ -762,7 +775,7 @@ function exportPDF(){
   document.head.appendChild(scr);
 }
 
-function openNb(id){S.openNb=id;S.currentPage=0;S.view='editor';S.tool='pen';closeSidebar();saveState();renderMain();}
+function openNb(id){S.openNb=id;S.currentPage=0;S.view='editor';S.tool='pen';viewInitialized=false;penSeen=false;closeSidebar();saveState();renderMain();}
 function closeEditor(){S.view='grid';S.openNb=null;saveState();renderMain();}
 function selFolder(id){S.selectedFolder=id;S.view='grid';S.openNb=null;closeSidebar();saveState();render();}
 function delFolder(e,id){e.stopPropagation();if(!confirm('¿Eliminar carpeta y sus cuadernos?'))return;

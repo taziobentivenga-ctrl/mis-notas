@@ -250,15 +250,30 @@ let S=loadState();
 let STROKES={},TEXTS={};
 
 function loadState(){
-  try{const s=localStorage.getItem('notasapp_v5');if(s)return JSON.parse(s);}catch(e){}
-  return{
-    folders:[{id:'f1',name:'Documentos',parentId:null,color:'#2979FF'},
-             {id:'f2',name:'Favoritos',parentId:null,color:'#E65100'}],
-    notebooks:[{id:'nb1',folderId:'f1',name:'Biometría',color:'#2979FF',pageType:'grid',pages:1}],
-    selectedFolder:'f1',openNb:null,currentPage:0,view:'grid',
-    tool:'pen',penColor:'#1c1c1e',penSize:2,
-    newNbColor:PAL[0],newNbType:'grid',
-  };
+  let st=null;
+  try{const s=localStorage.getItem('notasapp_v5');if(s)st=JSON.parse(s);}catch(e){}
+  if(!st){
+    st={
+      folders:[{id:'f1',name:'Documentos',parentId:null,color:'#2979FF'},
+               {id:'f2',name:'Favoritos',parentId:null,color:'#E65100'}],
+      notebooks:[{id:'nb1',folderId:'f1',name:'Biometría',color:'#2979FF',pageType:'grid',pages:1}],
+      selectedFolder:'f1',openNb:null,currentPage:0,view:'grid',
+      tool:'pen',penColor:'#1c1c1e',penSize:2,
+      newNbColor:PAL[0],newNbType:'grid',
+    };
+  }
+  // ── VALIDACIONES: corregir estado corrupto de versiones viejas ──
+  // Si el color del lápiz es blanco o inválido → negro (evita tinta invisible)
+  if(!st.penColor || st.penColor==='#ffffff' || st.penColor==='white' || !/^#[0-9a-fA-F]{6}$/.test(st.penColor)){
+    st.penColor='#1c1c1e';
+  }
+  // Grosor válido
+  if(!st.penSize || st.penSize<1 || st.penSize>16) st.penSize=2;
+  // Herramienta válida (si quedó en 'hand' o algo raro, volver a lápiz)
+  if(!['pen','marker','eraser','text','hand'].includes(st.tool)) st.tool='pen';
+  // Al cargar, siempre arrancar con lápiz para evitar confusión
+  if(st.tool==='hand') st.tool='pen';
+  return st;
 }
 function saveState(){try{localStorage.setItem('notasapp_v5',JSON.stringify(S));}catch(e){}}
 function saveStrokes(){
@@ -507,7 +522,7 @@ function isDrawingPointer(e){
 
 function onPointerDown(e){
   // Diagnóstico visible
-  showDebug(`down: ${e.pointerType} | tool: ${S.tool} | scale: ${view.scale.toFixed(2)}`);
+  showDebug(`down: ${e.pointerType} | tool: ${S.tool} | color: ${S.penColor} | scale: ${view.scale.toFixed(2)}`);
 
   // HERRAMIENTA MANO: arrastrar el lienzo con cualquier puntero
   if(S.tool==='hand'){
@@ -686,9 +701,12 @@ function replayStrokes(ctx,strokes){
   ctx.globalCompositeOperation='source-over';
 }
 function applyStyle(ctx,f){
-  if(f.tool==='eraser'){ctx.globalCompositeOperation='destination-out';ctx.strokeStyle='rgba(0,0,0,1)';ctx.lineWidth=f.size*6;}
-  else if(f.tool==='marker'){ctx.globalCompositeOperation='source-over';ctx.strokeStyle=f.color+'55';ctx.lineWidth=f.size*4;}
-  else{ctx.globalCompositeOperation='source-over';ctx.strokeStyle=f.color;ctx.lineWidth=f.size;}
+  // Grosor base multiplicado para que el trazo sea visible aun con la página alejada.
+  // En coordenadas internas (1000x1414) un trazo necesita más px para verse.
+  const baseW=Math.max(2.5, f.size*1.8);
+  if(f.tool==='eraser'){ctx.globalCompositeOperation='destination-out';ctx.strokeStyle='rgba(0,0,0,1)';ctx.lineWidth=Math.max(20,f.size*8);}
+  else if(f.tool==='marker'){ctx.globalCompositeOperation='source-over';ctx.strokeStyle=f.color+'55';ctx.lineWidth=baseW*3.5;}
+  else{ctx.globalCompositeOperation='source-over';ctx.strokeStyle=f.color;ctx.lineWidth=baseW;}
   ctx.lineCap='round';ctx.lineJoin='round';
 }
 function drawText(ctx,t){

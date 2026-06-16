@@ -146,8 +146,10 @@ html,body{height:100%;overflow:hidden;
   background:#fff;
   border-radius:2px;
 }
-#bgCanvas{position:absolute;top:0;left:0;pointer-events:none;border-radius:2px;}
-#drawCanvas{display:block;border-radius:2px;}
+/* bgCanvas: fondo (cuadrícula) ABAJO */
+#bgCanvas{position:absolute;top:0;left:0;z-index:1;pointer-events:none;border-radius:2px;}
+/* drawCanvas: tinta ARRIBA del fondo */
+#drawCanvas{position:absolute;top:0;left:0;z-index:2;pointer-events:none;border-radius:2px;}
 
 .export-bar{height:44px;background:#1c1c1e;border-top:0.5px solid rgba(255,255,255,0.08);
   padding:0 14px;padding-bottom:var(--safe-bottom);display:flex;align-items:center;gap:8px;flex-shrink:0;}

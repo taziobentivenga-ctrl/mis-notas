@@ -504,6 +504,8 @@ function renderEditor(){
       <div class="tsep"></div>
       <button class="tbtn" onclick="undoStroke()" title="Deshacer"><i class="ti ti-arrow-back-up" aria-hidden="true"></i></button>
       <button class="tbtn" onclick="clearPage()" title="Limpiar trazos"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      <div class="tsep"></div>
+      <button class="tbtn" id="palmBtn" onclick="togglePalmMode()" title="Modo de escritura (lápiz/dedo)"><i class="ti ti-wand" aria-hidden="true"></i></button>
       <div class="page-nav">
         <button onclick="prevPage()"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
         <span>${cp+1} / ${pages}</span>
@@ -524,7 +526,7 @@ function renderEditor(){
     <div class="export-bar">
       <button class="ebtn" onclick="exportPNG()"><i class="ti ti-photo" aria-hidden="true"></i> PNG</button>
       <button class="ebtn primary" onclick="exportPDF()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> Exportar PDF</button>
-      <div class="pencil-only"><i class="ti ti-pencil" aria-hidden="true"></i> Solo Apple Pencil dibuja</div>
+      <div class="pencil-only"><i class="ti ti-info-circle" aria-hidden="true"></i> <span id="palmBadge">Lápiz o dedo</span></div>
       <div class="sync-dot"><i class="ti ti-circle-check" aria-hidden="true"></i> Guardado</div>
     </div>
   </div>`;
@@ -569,6 +571,8 @@ function setupCanvas(nb,pageIndex){
   draw.addEventListener('pointerup',onUp);
   draw.addEventListener('pointercancel',onUp);
   draw.addEventListener('click',onTextClick);
+
+  updatePalmBadge();
 }
 
 // Cuadrícula mediana: 28px (cuaderno escolar)
@@ -638,14 +642,68 @@ function getXY(e){
   return{x:(e.clientX-r.left)*sx,y:(e.clientY-r.top)*sy};
 }
 
-// ── SOLO APPLE PENCIL DIBUJA ──
-// pointerType === 'pen' → Apple Pencil
-// pointerType === 'touch' → dedo (ignorado para dibujo)
-// pointerType === 'mouse' → mouse en PC (permitido)
-function isPen(e){return e.pointerType==='pen'||e.pointerType==='mouse';}
+// ── PALM REJECTION INTELIGENTE ──
+// Lógica:
+// - Si ALGUNA vez se detectó un Apple Pencil (pointerType 'pen'), la app
+//   entra en "modo lápiz": a partir de ahí los dedos (touch) NO dibujan,
+//   solo hacen scroll. Esto es el palm rejection real.
+// - Si nunca apareció un lápiz, permite dibujar con el dedo (por si no
+//   tenés Pencil o el iPad no lo reporta como 'pen').
+// - El usuario puede forzar el modo con el botón de la toolbar.
+let penDetected = false;      // ¿se vio un Apple Pencil alguna vez?
+let palmRejectMode = 'auto';  // 'auto' | 'pen-only' | 'allow-touch'
+
+function shouldDraw(e){
+  // El mouse (PC) siempre dibuja
+  if(e.pointerType==='mouse') return true;
+
+  // Apple Pencil: marca que hay lápiz y dibuja
+  if(e.pointerType==='pen'){
+    if(!penDetected){
+      penDetected=true;
+      updatePalmBadge();
+    }
+    return true;
+  }
+
+  // Dedo (touch)
+  if(e.pointerType==='touch'){
+    if(palmRejectMode==='pen-only') return false;       // forzado: dedo nunca dibuja
+    if(palmRejectMode==='allow-touch') return true;      // forzado: dedo dibuja
+    // auto: si ya hay lápiz detectado, el dedo NO dibuja (palm rejection)
+    return !penDetected;
+  }
+  return false;
+}
+
+function togglePalmMode(){
+  // Cicla: auto → pen-only → allow-touch → auto
+  if(palmRejectMode==='auto') palmRejectMode='pen-only';
+  else if(palmRejectMode==='pen-only') palmRejectMode='allow-touch';
+  else palmRejectMode='auto';
+  updatePalmBadge();
+}
+
+function updatePalmBadge(){
+  const badge=document.getElementById('palmBadge');
+  const btn=document.getElementById('palmBtn');
+  if(!badge||!btn)return;
+  let txt,icon,active;
+  if(palmRejectMode==='pen-only'){
+    txt='Solo lápiz'; icon='ti-pencil'; active=true;
+  }else if(palmRejectMode==='allow-touch'){
+    txt='Dedo + lápiz'; icon='ti-hand-finger'; active=false;
+  }else{
+    txt = penDetected ? 'Lápiz activo (palma OK)' : 'Lápiz o dedo';
+    icon='ti-wand'; active=penDetected;
+  }
+  badge.textContent=txt;
+  btn.querySelector('i').className='ti '+icon;
+  btn.classList.toggle('on',active);
+}
 
 function onDown(e){
-  if(!isPen(e))return;
+  if(!shouldDraw(e))return;
   if(S.tool==='text')return;
   drawing=true;curStroke=[];
   const p=getXY(e);
@@ -658,7 +716,9 @@ function onDown(e){
   e.preventDefault();
 }
 function onMove(e){
-  if(!isPen(e)||!drawing)return;
+  if(!drawing)return;
+  // Si está dibujando con lápiz y entra un touch, lo ignoramos (palma)
+  if(e.pointerType==='touch' && palmRejectMode!=='allow-touch' && penDetected)return;
   const p=getXY(e);
   const ctx=e.target.getContext('2d');
   // Curvas suaves con quadraticCurveTo para trazo más limpio
@@ -675,9 +735,9 @@ function onMove(e){
   e.preventDefault();
 }
 function onUp(e){
-  if(!isPen(e)||!drawing)return;
+  if(!drawing)return;
   drawing=false;
-  if(curStroke.length<2)return;
+  if(curStroke.length<2){curStroke=[];return;}
   const nb=S.notebooks.find(n=>n.id===S.openNb);
   const key=`${nb.id}_p${S.currentPage}`;
   if(!STROKES[key])STROKES[key]=[];

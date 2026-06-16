@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Mis Notas">
 <meta name="theme-color" content="#185FA5">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <title>Mis Notas</title>
 <style>
@@ -41,25 +41,24 @@
 }
 html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;font-size:15px;color:var(--text);background:var(--bg);}
 
-/* LAYOUT */
 .app{display:flex;height:100vh;height:100dvh;}
 
-/* SIDEBAR */
+/* SIDEBAR — oculto por defecto, overlay en mobile y desktop */
 .sidebar{
-  width:var(--sidebar);flex-shrink:0;
+  position:fixed;top:0;left:0;height:100%;z-index:50;
+  width:var(--sidebar);
   background:var(--bg);
-  border-right:0.5px solid var(--border);
+  border-right:0.5px solid var(--border2);
   display:flex;flex-direction:column;
-  overflow:hidden;
+  transform:translateX(-100%);
   transition:transform 0.25s ease;
+  box-shadow:4px 0 24px rgba(0,0,0,0.13);
 }
+.sidebar.open{transform:translateX(0);}
 .sidebar-header{
-  height:var(--header);
-  padding:0 14px;
-  padding-top:var(--safe-top);
+  height:var(--header);padding:0 14px;padding-top:var(--safe-top);
   display:flex;align-items:center;gap:10px;
-  border-bottom:0.5px solid var(--border);
-  background:var(--bg);
+  border-bottom:0.5px solid var(--border);background:var(--bg);
 }
 .sidebar-header .title{font-size:16px;font-weight:600;flex:1;color:var(--text);}
 .sidebar-scroll{flex:1;overflow-y:auto;padding:6px 0;}
@@ -90,21 +89,21 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 }
 .btn-new:hover{background:var(--bg2);color:var(--text);}
 
-/* MAIN */
-.main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg);}
+/* OVERLAY */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:49;}
+.overlay.show{display:block;}
+
+/* MAIN — ocupa todo el ancho siempre */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg);width:100%;}
 .main-header{
-  height:var(--header);
-  padding:0 16px;
-  padding-top:var(--safe-top);
+  height:var(--header);padding:0 16px;padding-top:var(--safe-top);
   display:flex;align-items:center;gap:10px;
-  border-bottom:0.5px solid var(--border);
-  background:var(--bg);
+  border-bottom:0.5px solid var(--border);background:var(--bg);
 }
 .main-header .path{flex:1;font-size:14px;color:var(--text2);}
 .main-header .path strong{color:var(--text);}
 .content{flex:1;overflow:auto;}
 
-/* ICON BUTTON */
 .ibtn{
   width:32px;height:32px;border:none;background:transparent;
   cursor:pointer;color:var(--text2);border-radius:var(--radius);
@@ -114,22 +113,16 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .ibtn:hover{background:var(--bg2);color:var(--text);}
 
 /* NOTEBOOKS GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
-  gap:14px;padding:18px;
-}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:14px;padding:18px;}
 .nb-card{
   background:var(--bg);border:0.5px solid var(--border2);
   border-radius:var(--radius-lg);cursor:pointer;overflow:hidden;
-  transition:border-color 0.15s,transform 0.1s;
-  position:relative;
+  transition:border-color 0.15s,transform 0.1s;position:relative;
   -webkit-tap-highlight-color:transparent;
 }
 .nb-card:active{transform:scale(0.97);}
 .nb-card:hover{border-color:var(--accent);}
 .nb-thumb{height:110px;position:relative;display:flex;align-items:center;justify-content:center;}
-.nb-thumb canvas{position:absolute;inset:0;width:100%;height:100%;}
 .nb-thumb i{position:relative;font-size:32px;z-index:1;}
 .nb-info{padding:10px 12px 12px;border-top:0.5px solid var(--border);}
 .nb-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -140,8 +133,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
 .add-card{
   background:transparent;border:0.5px dashed var(--border2);
-  border-radius:var(--radius-lg);cursor:pointer;
-  min-height:170px;
+  border-radius:var(--radius-lg);cursor:pointer;min-height:170px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
   color:var(--text3);font-size:13px;transition:background 0.12s,color 0.12s;
   -webkit-tap-highlight-color:transparent;
@@ -175,8 +167,20 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .page-nav button{border:0.5px solid var(--border2);background:transparent;border-radius:6px;padding:3px 7px;cursor:pointer;color:var(--text2);font-size:13px;}
 .page-nav button:hover{background:var(--bg2);}
 
-.canvas-wrap{flex:1;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:16px;background:var(--bg3);}
-.page{background:white;border:0.5px solid var(--border2);border-radius:4px;position:relative;flex-shrink:0;touch-action:none;}
+/* Canvas wrap: touch-action pan para dedos, el lápiz dibuja */
+.canvas-wrap{
+  flex:1;overflow:auto;
+  display:flex;justify-content:center;align-items:flex-start;
+  padding:16px;background:var(--bg3);
+  /* Permite scroll con dedos pero no activa dibujo */
+  touch-action:pan-x pan-y;
+}
+.page{
+  background:white;border:0.5px solid var(--border2);border-radius:4px;
+  position:relative;flex-shrink:0;
+  /* El canvas en sí tampoco interfiere con el scroll táctil */
+  touch-action:none;
+}
 
 .export-bar{
   background:var(--bg);border-top:0.5px solid var(--border);
@@ -194,56 +198,37 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .ebtn.primary:hover{opacity:0.88;}
 .sync{margin-left:auto;font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px;}
 
-/* MOBILE: sidebar overlay */
-@media(max-width:640px){
-  .sidebar{position:fixed;top:0;left:0;height:100%;z-index:50;transform:translateX(-100%);box-shadow:4px 0 20px rgba(0,0,0,0.12);}
-  .sidebar.open{transform:translateX(0);}
-  .menu-btn{display:flex!important;}
-  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:49;}
-  .overlay.show{display:block;}
-}
-.menu-btn{display:none;}
-
 /* MODALS */
-.modal-bg{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);
-  z-index:200;align-items:center;justify-content:center;padding:20px;
-}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;padding:20px;}
 .modal-bg.open{display:flex;}
-.modal{
-  background:var(--bg);border-radius:var(--radius-lg);border:0.5px solid var(--border);
-  padding:22px 24px;width:100%;max-width:340px;
-}
+.modal{background:var(--bg);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:22px 24px;width:100%;max-width:340px;}
 .modal h3{font-size:16px;font-weight:600;margin-bottom:16px;}
 .modal input,.modal select{
-  width:100%;padding:9px 11px;
-  border:0.5px solid var(--border2);border-radius:var(--radius);
-  background:var(--bg2);color:var(--text);font-size:14px;margin-bottom:12px;
-  outline:none;
+  width:100%;padding:9px 11px;border:0.5px solid var(--border2);border-radius:var(--radius);
+  background:var(--bg2);color:var(--text);font-size:14px;margin-bottom:12px;outline:none;
 }
 .modal input:focus,.modal select:focus{border-color:var(--accent);}
 .color-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
 .c-opt{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color 0.12s;}
 .c-opt.sel{border-color:var(--text);}
 .ptype-row{display:flex;gap:8px;margin-bottom:16px;}
-.ptype{
-  flex:1;padding:9px 4px;border:0.5px solid var(--border2);
-  border-radius:var(--radius);cursor:pointer;text-align:center;
-  font-size:12px;color:var(--text2);transition:background 0.12s;
-}
+.ptype{flex:1;padding:9px 4px;border:0.5px solid var(--border2);border-radius:var(--radius);cursor:pointer;text-align:center;font-size:12px;color:var(--text2);transition:background 0.12s;}
 .ptype.sel{border-color:var(--accent);background:var(--accent-light);color:var(--accent);}
 .modal-btns{display:flex;gap:8px;justify-content:flex-end;}
-.modal-btns button{
-  padding:8px 18px;border-radius:var(--radius);cursor:pointer;
-  font-size:14px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);
-  transition:background 0.12s;
-}
+.modal-btns button{padding:8px 18px;border-radius:var(--radius);cursor:pointer;font-size:14px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);transition:background 0.12s;}
 .modal-btns .ok{background:var(--accent);color:white;border-color:var(--accent);}
 
-/* EMPTY */
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:var(--text3);padding:40px;text-align:center;}
 .empty i{font-size:52px;}
 .empty p{font-size:15px;}
+
+/* Indicador de modo solo-lápiz */
+.pencil-badge{
+  font-size:11px;color:var(--text3);
+  display:flex;align-items:center;gap:4px;
+  padding:3px 8px;border:0.5px solid var(--border);border-radius:20px;
+  white-space:nowrap;
+}
 </style>
 </head>
 <body>
@@ -256,6 +241,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
       <i class="ti ti-notebook" style="font-size:20px;color:var(--accent)" aria-hidden="true"></i>
       <span class="title">Mis Notas</span>
       <button class="ibtn" onclick="openFolderModal(null)" title="Nueva carpeta"><i class="ti ti-folder-plus" aria-hidden="true"></i></button>
+      <button class="ibtn" onclick="closeSidebar()" title="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
     <div class="sidebar-scroll" id="folderList"></div>
     <div class="sidebar-footer">
@@ -267,7 +253,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
   <div class="main">
     <div class="main-header" id="mainHeader">
-      <button class="ibtn menu-btn" id="menuBtn" onclick="toggleSidebar()"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <button class="ibtn" onclick="toggleSidebar()" title="Carpetas"><i class="ti ti-layout-sidebar" aria-hidden="true"></i></button>
       <div class="path" id="mainPath"><strong>Seleccioná una carpeta</strong></div>
     </div>
     <div class="content" id="mainContent"></div>
@@ -309,15 +295,13 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 </div>
 
 <script>
-// ── PALETTE ──
-const PAL = ['#185FA5','#0F6E56','#993C1D','#993556','#534AB7','#854F0B','#3B6D11'];
+const PAL = ['#185FA5','#0F6E56','#993C1D','#993356','#534AB7','#854F0B','#3B6D11'];
 
-// ── STATE ──
 let S = loadState();
 
 function loadState() {
   try {
-    const saved = localStorage.getItem('notasapp_v2');
+    const saved = localStorage.getItem('notasapp_v3');
     if (saved) return JSON.parse(saved);
   } catch(e){}
   return {
@@ -328,38 +312,28 @@ function loadState() {
     notebooks: [
       {id:'nb1',folderId:'f1',name:'Mi primer cuaderno',color:'#185FA5',pageType:'grid',pages:1},
     ],
-    selectedFolder: 'f1',
-    openNb: null,
-    currentPage: 0,
-    view: 'grid',
-    tool: 'pen',
-    penColor: '#185FA5',
-    penSize: 2,
-    newNbColor: PAL[0],
-    newNbType: 'grid',
+    selectedFolder:'f1', openNb:null, currentPage:0, view:'grid',
+    tool:'pen', penColor:'#185FA5', penSize:2,
+    newNbColor:PAL[0], newNbType:'grid',
   };
 }
 
-// strokes stored separately to keep state lean
-let STROKES = {};  // key: nbid_pN → array of stroke arrays
-let TEXTS = {};    // key: nbid_pN → array of {x,y,text,color,size}
+// Strokes y textos separados del estado principal
+let STROKES = {}, TEXTS = {};
 
-function saveState() {
-  try { localStorage.setItem('notasapp_v2', JSON.stringify(S)); } catch(e){}
-}
+function saveState() { try { localStorage.setItem('notasapp_v3', JSON.stringify(S)); } catch(e){} }
 function saveStrokes() {
-  try { localStorage.setItem('notasapp_strokes', JSON.stringify(STROKES)); } catch(e){}
-  try { localStorage.setItem('notasapp_texts', JSON.stringify(TEXTS)); } catch(e){}
+  try { localStorage.setItem('notasapp_strokes_v3', JSON.stringify(STROKES)); } catch(e){}
+  try { localStorage.setItem('notasapp_texts_v3', JSON.stringify(TEXTS)); } catch(e){}
 }
 function loadStrokes() {
-  try { STROKES = JSON.parse(localStorage.getItem('notasapp_strokes') || '{}'); } catch(e){ STROKES={}; }
-  try { TEXTS = JSON.parse(localStorage.getItem('notasapp_texts') || '{}'); } catch(e){ TEXTS={}; }
+  try { STROKES = JSON.parse(localStorage.getItem('notasapp_strokes_v3') || '{}'); } catch(e){ STROKES={}; }
+  try { TEXTS = JSON.parse(localStorage.getItem('notasapp_texts_v3') || '{}'); } catch(e){ TEXTS={}; }
 }
-
 function uid() { return Math.random().toString(36).slice(2,9); }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── SIDEBAR TOGGLE (mobile) ──
+// ── SIDEBAR ──
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('overlay').classList.toggle('show');
@@ -370,11 +344,7 @@ function closeSidebar() {
 }
 
 // ── RENDER ──
-function render() {
-  renderSidebar();
-  renderMain();
-  saveState();
-}
+function render() { renderSidebar(); renderMain(); saveState(); }
 
 function renderSidebar() {
   const el = document.getElementById('folderList');
@@ -390,7 +360,7 @@ function renderSidebar() {
       const sact = S.selectedFolder===sf.id;
       h += folderRowHtml(sf, scnt, sact, true);
     }
-    h += `<div style="padding-left:36px;padding-bottom:2px;">
+    h += `<div style="padding-left:36px;padding-bottom:4px;">
       <button class="btn-new" style="font-size:11px;padding:4px 8px;" onclick="openFolderModal('${f.id}')">
         <i class="ti ti-plus" aria-hidden="true"></i> Subcarpeta
       </button></div>`;
@@ -423,7 +393,7 @@ function renderGrid() {
 
   let h = '';
   if (!folder) {
-    h = `<div class="empty"><i class="ti ti-folder-off"></i><p>Seleccioná una carpeta en el menú</p></div>`;
+    h = `<div class="empty"><i class="ti ti-folder-off"></i><p>Tocá el ícono de carpetas arriba a la izquierda</p></div>`;
   } else {
     h = `<div class="grid">`;
     for (const nb of nbs) {
@@ -466,7 +436,10 @@ function thumbSVG(type, color) {
 }
 
 // ── EDITOR ──
-let drawing=false, lastPt=null, curStroke=[];
+// Usamos DOS canvas apilados:
+// - bgCanvas: fondo (cuadrícula/rayado) — nunca se toca
+// - drawCanvas: donde van los trazos — el borrador solo afecta esto
+let drawing=false, curStroke=[];
 
 function renderEditor() {
   const nb = S.notebooks.find(n=>n.id===S.openNb);
@@ -476,7 +449,9 @@ function renderEditor() {
   document.getElementById('mainPath').innerHTML = `<strong>${esc(nb.name)}</strong>`;
 
   const colors = ['#185FA5','#0F6E56','#993C1D','#1c1c1e','#A32D2D','#854F0B','#534AB7','#ffffff'];
-  const swatches = colors.map(c=>`<div class="swatch${S.penColor===c?' sel':''}" style="background:${c};${c==='#ffffff'?'border:1px solid var(--border2);':''}" onclick="setPenColor('${c}')" title="${c}"></div>`).join('');
+  const swatches = colors.map(c=>
+    `<div class="swatch${S.penColor===c?' sel':''}" style="background:${c};${c==='#ffffff'?'border:1px solid var(--border2);':''}" onclick="setPenColor('${c}')" title="${c}"></div>`
+  ).join('');
 
   document.getElementById('mainContent').innerHTML = `<div class="editor" style="height:calc(100vh - var(--header));height:calc(100dvh - var(--header));">
     <div class="toolbar">
@@ -493,7 +468,7 @@ function renderEditor() {
       <span class="sz-label">${S.penSize}</span>
       <div class="tsep"></div>
       <button class="tbtn" onclick="undoStroke()" title="Deshacer"><i class="ti ti-arrow-back-up" aria-hidden="true"></i></button>
-      <button class="tbtn" onclick="clearPage()" title="Limpiar"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      <button class="tbtn" onclick="clearPage()" title="Limpiar trazos"><i class="ti ti-trash" aria-hidden="true"></i></button>
       <div class="page-nav">
         <button onclick="prevPage()"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
         <span>${cp+1}/${pages}</span>
@@ -502,11 +477,17 @@ function renderEditor() {
       </div>
     </div>
     <div class="canvas-wrap" id="canvasWrap">
-      <canvas id="noteCanvas" class="page"></canvas>
+      <div class="page" id="pageContainer" style="position:relative;">
+        <!-- Canvas del fondo (cuadrícula/rayado) — nunca se borra -->
+        <canvas id="bgCanvas" style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
+        <!-- Canvas de dibujo — encima del fondo -->
+        <canvas id="drawCanvas"></canvas>
+      </div>
     </div>
     <div class="export-bar">
       <button class="ebtn" onclick="exportPNG()"><i class="ti ti-photo" aria-hidden="true"></i> PNG</button>
       <button class="ebtn primary" onclick="exportPDF()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> Exportar PDF</button>
+      <div class="pencil-badge"><i class="ti ti-pencil" aria-hidden="true"></i> Solo Apple Pencil dibuja</div>
       <div class="sync"><i class="ti ti-cloud-check" aria-hidden="true"></i> Guardado</div>
     </div>
   </div>`;
@@ -516,60 +497,68 @@ function renderEditor() {
 
 function setupCanvas(nb, pageIndex) {
   const wrap = document.getElementById('canvasWrap');
-  const canvas = document.getElementById('noteCanvas');
-  if (!canvas) return;
+  const container = document.getElementById('pageContainer');
+  const bgCanvas = document.getElementById('bgCanvas');
+  const drawCanvas = document.getElementById('drawCanvas');
+  if (!drawCanvas) return;
 
-  // Size: A4-ish proportions, responsive
-  const maxW = Math.min(wrap.clientWidth - 32, 750);
+  const maxW = Math.min(wrap.clientWidth - 32, 900);
   const W = maxW;
-  const H = Math.round(W * 1.414); // A4 ratio
+  const H = Math.round(W * 1.414);
 
-  canvas.width = W;
-  canvas.height = H;
-  canvas.style.width = W + 'px';
-  canvas.style.height = H + 'px';
+  // Configurar ambos canvas con el mismo tamaño
+  [bgCanvas, drawCanvas].forEach(c => {
+    c.width = W; c.height = H;
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+  });
+  container.style.width = W + 'px';
+  container.style.height = H + 'px';
 
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0,0,W,H);
-  drawBg(ctx, nb.pageType, W, H);
+  // Fondo: cuadrícula/rayado en bgCanvas (permanente)
+  const bgCtx = bgCanvas.getContext('2d');
+  bgCtx.fillStyle = 'white';
+  bgCtx.fillRect(0,0,W,H);
+  drawBg(bgCtx, nb.pageType, W, H);
 
+  // Trazos guardados en drawCanvas
+  const drawCtx = drawCanvas.getContext('2d');
+  drawCtx.clearRect(0,0,W,H);
   const key = `${nb.id}_p${pageIndex}`;
-  if (STROKES[key]) replayStrokes(ctx, STROKES[key], W, H, nb.pageType);
-  if (TEXTS[key]) { for (const t of TEXTS[key]) drawText(ctx, t); }
+  if (STROKES[key]) replayStrokes(drawCtx, STROKES[key]);
+  if (TEXTS[key]) { for (const t of TEXTS[key]) drawText(drawCtx, t); }
 
-  canvas.addEventListener('pointerdown', onDown);
-  canvas.addEventListener('pointermove', onMove);
-  canvas.addEventListener('pointerup', onUp);
-  canvas.addEventListener('pointercancel', onUp);
-  canvas.addEventListener('click', onTextClick);
+  // Solo el drawCanvas recibe eventos de puntero
+  drawCanvas.addEventListener('pointerdown', onDown);
+  drawCanvas.addEventListener('pointermove', onMove);
+  drawCanvas.addEventListener('pointerup', onUp);
+  drawCanvas.addEventListener('pointercancel', onUp);
+  drawCanvas.addEventListener('click', onTextClick);
 }
 
 function drawBg(ctx, type, W, H) {
   ctx.save();
   if (type==='grid') {
-    const step=Math.round(W/35);
-    ctx.strokeStyle='rgba(100,120,210,0.15)';ctx.lineWidth=0.5;
+    const step = Math.round(W / 35);
+    ctx.strokeStyle='rgba(100,120,210,0.18)'; ctx.lineWidth=0.5;
     for(let x=0;x<=W;x+=step){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
     for(let y=0;y<=H;y+=step){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
   } else if (type==='lines') {
-    const step=Math.round(H/32);
-    ctx.strokeStyle='rgba(100,120,210,0.18)';ctx.lineWidth=0.7;
+    const step = Math.round(H/32);
+    ctx.strokeStyle='rgba(100,120,210,0.2)'; ctx.lineWidth=0.7;
     for(let y=step;y<H;y+=step){ctx.beginPath();ctx.moveTo(Math.round(W*0.08),y);ctx.lineTo(W-10,y);ctx.stroke();}
-    ctx.strokeStyle='rgba(200,80,80,0.18)';ctx.lineWidth=1;
+    ctx.strokeStyle='rgba(200,80,80,0.2)'; ctx.lineWidth=1;
     const lx=Math.round(W*0.12);
     ctx.beginPath();ctx.moveTo(lx,0);ctx.lineTo(lx,H);ctx.stroke();
   }
   ctx.restore();
 }
 
-function replayStrokes(ctx, strokes, W, H, type) {
-  drawBg(ctx, type, W, H);
+function replayStrokes(ctx, strokes) {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   for (const s of strokes) {
     if (!s||!s.length) continue;
     applyStyle(ctx, s[0]);
-    ctx.beginPath();
-    ctx.moveTo(s[0].x, s[0].y);
+    ctx.beginPath(); ctx.moveTo(s[0].x, s[0].y);
     for (let i=1;i<s.length;i++) ctx.lineTo(s[i].x, s[i].y);
     ctx.stroke();
   }
@@ -578,6 +567,7 @@ function replayStrokes(ctx, strokes, W, H, type) {
 
 function applyStyle(ctx, f) {
   if (f.tool==='eraser') {
+    // El borrador solo borra el drawCanvas, nunca toca el bgCanvas
     ctx.globalCompositeOperation='destination-out';
     ctx.strokeStyle='rgba(0,0,0,1)';
     ctx.lineWidth=f.size*5;
@@ -590,7 +580,7 @@ function applyStyle(ctx, f) {
     ctx.strokeStyle=f.color;
     ctx.lineWidth=f.size;
   }
-  ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.lineCap='round'; ctx.lineJoin='round';
 }
 
 function drawText(ctx, t) {
@@ -606,29 +596,33 @@ function getXY(e) {
   return {x:(e.clientX-r.left)*sx, y:(e.clientY-r.top)*sy};
 }
 
+// ── DIBUJO: solo lápiz óptico (pointerType === 'pen') ──
+// Los dedos (pointerType === 'touch') NO dibujan — solo hacen scroll
 function onDown(e) {
+  // Ignorar dedos — solo Apple Pencil ('pen') y mouse ('mouse')
+  if (e.pointerType === 'touch') return;
   if (S.tool==='text') return;
   drawing=true; curStroke=[];
   const p=getXY(e);
-  lastPt=p;
   const first={...p, tool:S.tool, color:S.penColor, size:S.penSize};
   curStroke.push(first);
   const ctx=e.target.getContext('2d');
   applyStyle(ctx,first);
-  ctx.beginPath();ctx.moveTo(p.x,p.y);
+  ctx.beginPath(); ctx.moveTo(p.x,p.y);
   e.target.setPointerCapture(e.pointerId);
   e.preventDefault();
 }
 function onMove(e) {
+  if (e.pointerType === 'touch') return;
   if (!drawing) return;
   const p=getXY(e);
   const ctx=e.target.getContext('2d');
-  ctx.lineTo(p.x,p.y);ctx.stroke();
+  ctx.lineTo(p.x,p.y); ctx.stroke();
   curStroke.push({x:p.x,y:p.y});
-  lastPt=p;
   e.preventDefault();
 }
 function onUp(e) {
+  if (e.pointerType === 'touch') return;
   if (!drawing) return;
   drawing=false;
   if (curStroke.length<2) return;
@@ -641,6 +635,7 @@ function onUp(e) {
 }
 
 function onTextClick(e) {
+  // Texto se puede agregar con dedo también (es un tap, no un arrastre)
   if (S.tool!=='text') return;
   const p=getXY(e);
   const text=prompt('Escribí el texto:');
@@ -666,7 +661,7 @@ function undoStroke() {
 }
 
 function clearPage() {
-  if (!confirm('¿Limpiar esta página?')) return;
+  if (!confirm('¿Limpiar los trazos de esta página? La cuadrícula se mantiene.')) return;
   const nb=S.notebooks.find(n=>n.id===S.openNb);
   const key=`${nb.id}_p${S.currentPage}`;
   STROKES[key]=[]; TEXTS[key]=[];
@@ -674,14 +669,13 @@ function clearPage() {
   redrawCanvas(nb,S.currentPage);
 }
 
-function redrawCanvas(nb,pageIndex) {
-  const canvas=document.getElementById('noteCanvas');
-  if (!canvas) return;
-  const ctx=canvas.getContext('2d');
+function redrawCanvas(nb, pageIndex) {
+  const drawCanvas=document.getElementById('drawCanvas');
+  if (!drawCanvas) return;
+  const ctx=drawCanvas.getContext('2d');
   ctx.globalCompositeOperation='source-over';
-  ctx.fillStyle='white';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  replayStrokes(ctx, STROKES[`${nb.id}_p${pageIndex}`]||[], canvas.width, canvas.height, nb.pageType);
+  ctx.clearRect(0,0,drawCanvas.width,drawCanvas.height);
+  replayStrokes(ctx, STROKES[`${nb.id}_p${pageIndex}`]||[]);
   if (TEXTS[`${nb.id}_p${pageIndex}`]) {
     for (const t of TEXTS[`${nb.id}_p${pageIndex}`]) drawText(ctx,t);
   }
@@ -689,7 +683,7 @@ function redrawCanvas(nb,pageIndex) {
 
 function setTool(t) { S.tool=t; saveState(); renderEditor(); }
 function setPenColor(c) { S.penColor=c; saveState(); renderEditor(); }
-function setPenSize(v) { S.penSize=v; document.querySelector('.sz-label').textContent=v; }
+function setPenSize(v) { S.penSize=v; const el=document.querySelector('.sz-label'); if(el) el.textContent=v; }
 
 function addPage() {
   const nb=S.notebooks.find(n=>n.id===S.openNb);
@@ -697,36 +691,45 @@ function addPage() {
   S.currentPage=nb.pages-1;
   saveState();renderEditor();
 }
-function prevPage() {
-  if (S.currentPage>0){S.currentPage--;saveState();renderEditor();}
-}
+function prevPage() { if (S.currentPage>0){S.currentPage--;saveState();renderEditor();} }
 function nextPage() {
   const nb=S.notebooks.find(n=>n.id===S.openNb);
   if (S.currentPage<(nb.pages||1)-1){S.currentPage++;saveState();renderEditor();}
 }
 
+// Exportar: combina bgCanvas + drawCanvas en un canvas temporal
+function getMergedCanvas() {
+  const bg=document.getElementById('bgCanvas');
+  const draw=document.getElementById('drawCanvas');
+  if (!bg||!draw) return null;
+  const tmp=document.createElement('canvas');
+  tmp.width=bg.width; tmp.height=bg.height;
+  const ctx=tmp.getContext('2d');
+  ctx.drawImage(bg,0,0);
+  ctx.drawImage(draw,0,0);
+  return tmp;
+}
+
 function exportPNG() {
-  const canvas=document.getElementById('noteCanvas');
-  if (!canvas) return;
+  const tmp=getMergedCanvas(); if(!tmp) return;
   const nb=S.notebooks.find(n=>n.id===S.openNb);
   const a=document.createElement('a');
   a.download=`${nb.name}-pagina${S.currentPage+1}.png`;
-  a.href=canvas.toDataURL('image/png');
+  a.href=tmp.toDataURL('image/png');
   a.click();
 }
 
 function exportPDF() {
-  const canvas=document.getElementById('noteCanvas');
-  if (!canvas){alert('Abrí un cuaderno primero');return;}
+  const tmp=getMergedCanvas();
+  if (!tmp){alert('Abrí un cuaderno primero');return;}
   const nb=S.notebooks.find(n=>n.id===S.openNb);
   const scr=document.createElement('script');
   scr.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
   scr.onload=function(){
     const {jsPDF}=window.jspdf;
-    const W=canvas.width,H=canvas.height;
+    const W=tmp.width,H=tmp.height;
     const doc=new jsPDF({orientation:H>W?'portrait':'landscape',unit:'px',format:[W,H]});
-    const img=canvas.toDataURL('image/png');
-    doc.addImage(img,'PNG',0,0,W,H);
+    doc.addImage(tmp.toDataURL('image/png'),'PNG',0,0,W,H);
     doc.save(`${nb.name}.pdf`);
   };
   document.head.appendChild(scr);
@@ -736,9 +739,7 @@ function openNb(id) {
   S.openNb=id; S.currentPage=0; S.view='editor'; S.tool='pen';
   closeSidebar(); saveState(); renderMain();
 }
-function closeEditor() {
-  S.view='grid'; S.openNb=null; saveState(); renderMain();
-}
+function closeEditor() { S.view='grid'; S.openNb=null; saveState(); renderMain(); }
 function selFolder(id) {
   S.selectedFolder=id; S.view='grid'; S.openNb=null;
   closeSidebar(); saveState(); render();
@@ -777,8 +778,7 @@ function confirmFolder(){
   const name=document.getElementById('folderName').value.trim();
   if (!name) return;
   const parentId=document.getElementById('parentSel').value||null;
-  const colors=PAL;
-  S.folders.push({id:uid(),name,parentId,color:colors[S.folders.length%colors.length]});
+  S.folders.push({id:uid(),name,parentId,color:PAL[S.folders.length%PAL.length]});
   closeFolderModal();render();
 }
 
@@ -815,11 +815,7 @@ function confirmNb(){
 // ── INIT ──
 loadStrokes();
 render();
-
-// Register service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(()=>{}); }
 </script>
 </body>
 </html>

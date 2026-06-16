@@ -344,7 +344,7 @@ function thumbSVG(type){
 const PAGE_W=1000, PAGE_H=1414;   // resolución interna de la hoja (fija)
 
 let view={scale:1, tx:0, ty:0};   // transform del plano
-let drawing=false, curStroke=[], drawCtx=null;
+let drawing=false, curStroke=[], drawCtx=null, drawingPointerId=null;
 let penSeen=false;                 // ¿se detectó Apple Pencil?
 let penMode='auto';                // auto | pen-only | allow-touch
 
@@ -430,18 +430,20 @@ function setupEditor(nb,pageIndex){
   if(STROKES[key])replayStrokes(drawCtx,STROKES[key]);
   if(TEXTS[key])for(const t of TEXTS[key])drawText(drawCtx,t);
 
-  // Ajustar zoom inicial para que la hoja entre en pantalla
-  fitToScreen();
-
   // ── EVENTOS UNIFICADOS ──
   // Usamos pointer events en el VIEWPORT (no en el canvas) para capturar todo
   viewport.addEventListener('pointerdown',onPointerDown,{passive:false});
   viewport.addEventListener('pointermove',onPointerMove,{passive:false});
   viewport.addEventListener('pointerup',onPointerUp,{passive:false});
   viewport.addEventListener('pointercancel',onPointerUp,{passive:false});
-  viewport.addEventListener('pointerleave',onPointerUp,{passive:false});
   // Zoom con rueda (trackpad/mouse en PC)
   viewport.addEventListener('wheel',onWheel,{passive:false});
+
+  // Ajustar zoom inicial DESPUÉS de que el layout esté listo.
+  // Sin esto, viewport.clientWidth puede ser 0 y romper el scale.
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{ fitToScreen(); });
+  });
 
   updatePenModeUI();
 }
@@ -450,10 +452,12 @@ function fitToScreen(){
   const vp=document.getElementById('viewport');
   if(!vp)return;
   const vw=vp.clientWidth, vh=vp.clientHeight;
+  // Protección: si el layout aún no está listo, reintentar
+  if(vw<10||vh<10){ requestAnimationFrame(fitToScreen); return; }
   const pad=40;
   const scale=Math.min((vw-pad)/PAGE_W,(vh-pad)/PAGE_H);
-  view.scale=scale;
-  view.tx=(vw-PAGE_W*scale)/2;
+  view.scale=scale>0?scale:1;
+  view.tx=(vw-PAGE_W*view.scale)/2;
   view.ty=20;
   applyTransform();
 }
@@ -500,12 +504,14 @@ function onPointerDown(e){
     // DIBUJAR
     e.preventDefault();
     drawing=true;curStroke=[];
+    drawingPointerId=e.pointerId;
     const p=screenToPage(e.clientX,e.clientY);
     const first={x:p.x,y:p.y,tool:S.tool,color:S.penColor,size:S.penSize};
     curStroke.push(first);
     applyStyle(drawCtx,first);
     drawCtx.beginPath();drawCtx.moveTo(p.x,p.y);
-    try{e.target.setPointerCapture(e.pointerId);}catch(_){}
+    // Capturar sobre currentTarget (el viewport), no sobre el hijo
+    try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}
   }else if(e.pointerType==='touch'){
     // GESTO (zoom/pan con dedos)
     activeTouches.set(e.pointerId,{x:e.clientX,y:e.clientY});

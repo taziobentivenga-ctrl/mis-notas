@@ -14,20 +14,22 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --accent:#185FA5;
-  --accent-light:#E6F1FB;
+  --accent:#2979FF;
+  --accent-light:#E8F0FE;
   --bg:#ffffff;
   --bg2:#f5f5f7;
-  --bg3:#ebebee;
+  --bg3:#e8e8ed;
+  --bg-editor:#1a1a1e;
   --text:#1c1c1e;
   --text2:#6e6e73;
   --text3:#aeaeb2;
-  --border:rgba(0,0,0,0.1);
-  --border2:rgba(0,0,0,0.18);
+  --border:rgba(0,0,0,0.08);
+  --border2:rgba(0,0,0,0.14);
   --radius:10px;
   --radius-lg:14px;
-  --sidebar:240px;
-  --header:52px;
+  --sidebar:230px;
+  --header:50px;
+  --toolbar:52px;
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -35,65 +37,63 @@
   :root{
     --bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;
     --text:#f2f2f7;--text2:#aeaeb2;--text3:#636366;
-    --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
-    --accent-light:#0c2d4a;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.16);
+    --accent-light:#1a2a4a;
   }
 }
-html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;font-size:15px;color:var(--text);background:var(--bg);}
+html,body{height:100%;overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif;
+  font-size:15px;color:var(--text);background:var(--bg);}
 
 .app{display:flex;height:100vh;height:100dvh;}
 
-/* SIDEBAR — oculto por defecto, overlay en mobile y desktop */
+/* ── SIDEBAR ── */
 .sidebar{
   position:fixed;top:0;left:0;height:100%;z-index:50;
-  width:var(--sidebar);
-  background:var(--bg);
+  width:var(--sidebar);background:var(--bg);
   border-right:0.5px solid var(--border2);
   display:flex;flex-direction:column;
-  transform:translateX(-100%);
-  transition:transform 0.25s ease;
-  box-shadow:4px 0 24px rgba(0,0,0,0.13);
+  transform:translateX(-100%);transition:transform 0.22s ease;
+  box-shadow:6px 0 28px rgba(0,0,0,0.15);
 }
 .sidebar.open{transform:translateX(0);}
 .sidebar-header{
-  height:var(--header);padding:0 14px;padding-top:var(--safe-top);
+  height:var(--header);padding:0 16px;padding-top:var(--safe-top);
   display:flex;align-items:center;gap:10px;
-  border-bottom:0.5px solid var(--border);background:var(--bg);
+  border-bottom:0.5px solid var(--border);
 }
-.sidebar-header .title{font-size:16px;font-weight:600;flex:1;color:var(--text);}
-.sidebar-scroll{flex:1;overflow-y:auto;padding:6px 0;}
-.sidebar-footer{padding:10px;border-top:0.5px solid var(--border);}
-
+.sidebar-logo{font-size:17px;font-weight:700;flex:1;color:var(--text);letter-spacing:-0.3px;}
+.sidebar-scroll{flex:1;overflow-y:auto;padding:8px 0;}
+.sidebar-section{font-size:11px;font-weight:600;color:var(--text3);
+  padding:12px 16px 4px;letter-spacing:0.5px;text-transform:uppercase;}
 .folder-row{
-  display:flex;align-items:center;gap:8px;
-  padding:8px 14px;margin:1px 6px;
+  display:flex;align-items:center;gap:9px;
+  padding:9px 14px;margin:1px 8px;
   border-radius:var(--radius);cursor:pointer;
-  color:var(--text2);font-size:14px;user-select:none;
-  transition:background 0.12s;
+  color:var(--text2);font-size:14px;user-select:none;transition:background 0.12s;
 }
 .folder-row:hover{background:var(--bg2);}
 .folder-row.active{background:var(--accent-light);color:var(--accent);font-weight:500;}
-.folder-row i{font-size:17px;flex-shrink:0;}
+.folder-row i{font-size:18px;flex-shrink:0;}
 .folder-row .fname{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .folder-row .fmeta{font-size:11px;color:var(--text3);}
-.folder-row .fdel{display:none;width:20px;height:20px;align-items:center;justify-content:center;border:none;background:transparent;color:var(--text3);cursor:pointer;border-radius:4px;font-size:14px;}
+.fdel{display:none;width:20px;height:20px;align-items:center;justify-content:center;
+  border:none;background:transparent;color:var(--text3);cursor:pointer;border-radius:4px;font-size:13px;}
 .folder-row:hover .fdel{display:flex;}
-.subfolder-row{padding-left:32px;}
-
+.subfolder-row{padding-left:34px;}
+.sidebar-footer{padding:10px 10px calc(10px + var(--safe-bottom));border-top:0.5px solid var(--border);}
 .btn-new{
   width:100%;padding:8px;border:0.5px solid var(--border2);
   background:transparent;border-radius:var(--radius);cursor:pointer;
   color:var(--text2);font-size:13px;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  transition:background 0.12s;
+  display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.12s;
 }
 .btn-new:hover{background:var(--bg2);color:var(--text);}
 
-/* OVERLAY */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:49;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:49;}
 .overlay.show{display:block;}
 
-/* MAIN — ocupa todo el ancho siempre */
+/* ── MAIN ── */
 .main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg);width:100%;}
 .main-header{
   height:var(--header);padding:0 16px;padding-top:var(--safe-top);
@@ -101,19 +101,19 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   border-bottom:0.5px solid var(--border);background:var(--bg);
 }
 .main-header .path{flex:1;font-size:14px;color:var(--text2);}
-.main-header .path strong{color:var(--text);}
+.main-header .path strong{color:var(--text);font-weight:600;}
 .content{flex:1;overflow:auto;}
 
 .ibtn{
-  width:32px;height:32px;border:none;background:transparent;
-  cursor:pointer;color:var(--text2);border-radius:var(--radius);
-  display:flex;align-items:center;justify-content:center;font-size:18px;
-  transition:background 0.12s;flex-shrink:0;
+  width:34px;height:34px;border:none;background:transparent;cursor:pointer;
+  color:var(--text2);border-radius:var(--radius);
+  display:flex;align-items:center;justify-content:center;font-size:19px;
+  transition:background 0.12s;flex-shrink:0;-webkit-tap-highlight-color:transparent;
 }
 .ibtn:hover{background:var(--bg2);color:var(--text);}
 
-/* NOTEBOOKS GRID */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:14px;padding:18px;}
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;padding:20px;}
 .nb-card{
   background:var(--bg);border:0.5px solid var(--border2);
   border-radius:var(--radius-lg);cursor:pointer;overflow:hidden;
@@ -122,86 +122,123 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 }
 .nb-card:active{transform:scale(0.97);}
 .nb-card:hover{border-color:var(--accent);}
-.nb-thumb{height:110px;position:relative;display:flex;align-items:center;justify-content:center;}
-.nb-thumb i{position:relative;font-size:32px;z-index:1;}
+.nb-thumb{height:115px;position:relative;display:flex;align-items:center;justify-content:center;background:#fafafa;}
+@media(prefers-color-scheme:dark){.nb-thumb{background:#2a2a2c;}}
+.nb-thumb i{position:relative;font-size:34px;z-index:1;}
 .nb-info{padding:10px 12px 12px;border-top:0.5px solid var(--border);}
 .nb-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.nb-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.nb-sub{font-size:11px;color:var(--text3);margin-top:3px;}
 .nb-del{position:absolute;top:6px;right:6px;display:none;}
 .nb-card:hover .nb-del{display:flex;}
-.nb-color-bar{height:3px;}
-
+.nb-color-bar{height:4px;}
 .add-card{
   background:transparent;border:0.5px dashed var(--border2);
-  border-radius:var(--radius-lg);cursor:pointer;min-height:170px;
+  border-radius:var(--radius-lg);cursor:pointer;min-height:175px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
   color:var(--text3);font-size:13px;transition:background 0.12s,color 0.12s;
   -webkit-tap-highlight-color:transparent;
 }
 .add-card:hover{background:var(--bg2);color:var(--text);}
 
-/* EDITOR */
+/* ── EDITOR ── */
 .editor{display:flex;flex-direction:column;height:100%;}
+
+/* Toolbar estilo Goodnotes: fondo oscuro, íconos grandes */
 .toolbar{
-  background:var(--bg);border-bottom:0.5px solid var(--border);
-  padding:6px 10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  height:var(--toolbar);
+  background:#1c1c1e;
+  border-bottom:0.5px solid rgba(255,255,255,0.08);
+  padding:0 12px;display:flex;align-items:center;gap:4px;
+  overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:none;
 }
-.tsep{width:0.5px;height:22px;background:var(--border2);margin:0 3px;flex-shrink:0;}
+.toolbar::-webkit-scrollbar{display:none;}
+
+.tsep{width:0.5px;height:24px;background:rgba(255,255,255,0.12);margin:0 4px;flex-shrink:0;}
+
 .tbtn{
-  width:34px;height:34px;border:none;background:transparent;cursor:pointer;
-  color:var(--text2);border-radius:var(--radius);
-  display:flex;align-items:center;justify-content:center;font-size:18px;
-  transition:background 0.12s;-webkit-tap-highlight-color:transparent;
+  width:38px;height:38px;border:none;background:transparent;cursor:pointer;
+  color:rgba(255,255,255,0.6);border-radius:var(--radius);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  transition:background 0.12s,color 0.12s;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
 }
-.tbtn:hover,.tbtn.on{background:var(--accent-light);color:var(--accent);}
-.swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color 0.12s;flex-shrink:0;}
-.swatch.sel{border-color:var(--text);}
-.sz-label{font-size:12px;color:var(--text3);min-width:22px;text-align:center;}
+.tbtn:hover{background:rgba(255,255,255,0.1);color:white;}
+.tbtn.on{background:var(--accent);color:white;}
+
+.swatch{
+  width:24px;height:24px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:border-color 0.12s,transform 0.1s;
+  flex-shrink:0;
+}
+.swatch:active{transform:scale(0.9);}
+.swatch.sel{border-color:white;}
+
+.sz-label{font-size:12px;color:rgba(255,255,255,0.5);min-width:22px;text-align:center;}
+
 .back-btn{
-  padding:5px 12px;border:0.5px solid var(--border2);background:transparent;
-  border-radius:var(--radius);cursor:pointer;color:var(--text2);font-size:13px;
+  padding:5px 12px;border:0.5px solid rgba(255,255,255,0.2);background:transparent;
+  border-radius:var(--radius);cursor:pointer;color:rgba(255,255,255,0.7);font-size:13px;
   display:flex;align-items:center;gap:5px;transition:background 0.12s;flex-shrink:0;
 }
-.back-btn:hover{background:var(--bg2);color:var(--text);}
-.page-nav{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text2);}
-.page-nav button{border:0.5px solid var(--border2);background:transparent;border-radius:6px;padding:3px 7px;cursor:pointer;color:var(--text2);font-size:13px;}
-.page-nav button:hover{background:var(--bg2);}
+.back-btn:hover{background:rgba(255,255,255,0.1);color:white;}
 
-/* Canvas wrap: touch-action pan para dedos, el lápiz dibuja */
+.page-nav{
+  margin-left:auto;display:flex;align-items:center;gap:5px;
+  font-size:13px;color:rgba(255,255,255,0.6);white-space:nowrap;
+}
+.page-nav button{
+  border:0.5px solid rgba(255,255,255,0.2);background:transparent;
+  border-radius:6px;padding:3px 8px;cursor:pointer;
+  color:rgba(255,255,255,0.7);font-size:14px;
+}
+.page-nav button:hover{background:rgba(255,255,255,0.1);}
+
+/* Canvas wrap: fondo oscuro como Goodnotes, scroll con dedos */
 .canvas-wrap{
   flex:1;overflow:auto;
   display:flex;justify-content:center;align-items:flex-start;
-  padding:16px;background:var(--bg3);
-  /* Permite scroll con dedos pero no activa dibujo */
+  padding:24px 16px;
+  background:#1a1a1e;
   touch-action:pan-x pan-y;
 }
-.page{
-  background:white;border:0.5px solid var(--border2);border-radius:4px;
+.page-container{
   position:relative;flex-shrink:0;
-  /* El canvas en sí tampoco interfiere con el scroll táctil */
-  touch-action:none;
+  border-radius:3px;
+  box-shadow:0 4px 32px rgba(0,0,0,0.5),0 1px 4px rgba(0,0,0,0.3);
 }
+/* bgCanvas: fondo permanente */
+#bgCanvas{position:absolute;top:0;left:0;pointer-events:none;border-radius:3px;}
+/* drawCanvas: trazos encima */
+#drawCanvas{display:block;border-radius:3px;touch-action:none;}
 
 .export-bar{
-  background:var(--bg);border-top:0.5px solid var(--border);
-  padding:8px 12px;padding-bottom:calc(8px + var(--safe-bottom));
-  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  height:44px;
+  background:#1c1c1e;
+  border-top:0.5px solid rgba(255,255,255,0.08);
+  padding:0 14px;padding-bottom:var(--safe-bottom);
+  display:flex;align-items:center;gap:8px;
 }
 .ebtn{
-  padding:7px 14px;border:0.5px solid var(--border2);background:transparent;
-  border-radius:var(--radius);cursor:pointer;font-size:13px;color:var(--text2);
+  padding:6px 14px;border:0.5px solid rgba(255,255,255,0.2);background:transparent;
+  border-radius:var(--radius);cursor:pointer;font-size:13px;
+  color:rgba(255,255,255,0.7);
   display:flex;align-items:center;gap:6px;transition:background 0.12s;
   -webkit-tap-highlight-color:transparent;
 }
-.ebtn:hover{background:var(--bg2);color:var(--text);}
+.ebtn:hover{background:rgba(255,255,255,0.1);color:white;}
 .ebtn.primary{background:var(--accent);color:white;border-color:var(--accent);}
 .ebtn.primary:hover{opacity:0.88;}
-.sync{margin-left:auto;font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px;}
+.pencil-only{
+  font-size:11px;color:rgba(255,255,255,0.35);
+  display:flex;align-items:center;gap:4px;
+}
+.sync-dot{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:5px;}
 
-/* MODALS */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;padding:20px;}
+/* ── MODALS ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;padding:20px;}
 .modal-bg.open{display:flex;}
-.modal{background:var(--bg);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:22px 24px;width:100%;max-width:340px;}
+.modal{background:var(--bg);border-radius:var(--radius-lg);border:0.5px solid var(--border2);padding:22px 24px;width:100%;max-width:340px;}
 .modal h3{font-size:16px;font-weight:600;margin-bottom:16px;}
 .modal input,.modal select{
   width:100%;padding:9px 11px;border:0.5px solid var(--border2);border-radius:var(--radius);
@@ -212,23 +249,18 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .c-opt{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color 0.12s;}
 .c-opt.sel{border-color:var(--text);}
 .ptype-row{display:flex;gap:8px;margin-bottom:16px;}
-.ptype{flex:1;padding:9px 4px;border:0.5px solid var(--border2);border-radius:var(--radius);cursor:pointer;text-align:center;font-size:12px;color:var(--text2);transition:background 0.12s;}
+.ptype{flex:1;padding:9px 4px;border:0.5px solid var(--border2);border-radius:var(--radius);
+  cursor:pointer;text-align:center;font-size:12px;color:var(--text2);transition:background 0.12s;}
 .ptype.sel{border-color:var(--accent);background:var(--accent-light);color:var(--accent);}
 .modal-btns{display:flex;gap:8px;justify-content:flex-end;}
-.modal-btns button{padding:8px 18px;border-radius:var(--radius);cursor:pointer;font-size:14px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);transition:background 0.12s;}
+.modal-btns button{padding:8px 18px;border-radius:var(--radius);cursor:pointer;font-size:14px;
+  border:0.5px solid var(--border2);background:transparent;color:var(--text2);transition:background 0.12s;}
 .modal-btns .ok{background:var(--accent);color:white;border-color:var(--accent);}
 
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:var(--text3);padding:40px;text-align:center;}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:14px;color:var(--text3);padding:40px;text-align:center;}
 .empty i{font-size:52px;}
-.empty p{font-size:15px;}
-
-/* Indicador de modo solo-lápiz */
-.pencil-badge{
-  font-size:11px;color:var(--text3);
-  display:flex;align-items:center;gap:4px;
-  padding:3px 8px;border:0.5px solid var(--border);border-radius:20px;
-  white-space:nowrap;
-}
+.empty p{font-size:15px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -239,28 +271,27 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <i class="ti ti-notebook" style="font-size:20px;color:var(--accent)" aria-hidden="true"></i>
-      <span class="title">Mis Notas</span>
-      <button class="ibtn" onclick="openFolderModal(null)" title="Nueva carpeta"><i class="ti ti-folder-plus" aria-hidden="true"></i></button>
-      <button class="ibtn" onclick="closeSidebar()" title="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button>
+      <span class="sidebar-logo">Mis Notas</span>
+      <button class="ibtn" onclick="closeSidebar()"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
     <div class="sidebar-scroll" id="folderList"></div>
     <div class="sidebar-footer">
       <button class="btn-new" onclick="openFolderModal(null)">
-        <i class="ti ti-plus" aria-hidden="true"></i> Nueva carpeta
+        <i class="ti ti-folder-plus" aria-hidden="true"></i> Nueva carpeta
       </button>
     </div>
   </div>
 
   <div class="main">
     <div class="main-header" id="mainHeader">
-      <button class="ibtn" onclick="toggleSidebar()" title="Carpetas"><i class="ti ti-layout-sidebar" aria-hidden="true"></i></button>
-      <div class="path" id="mainPath"><strong>Seleccioná una carpeta</strong></div>
+      <button class="ibtn" onclick="toggleSidebar()"><i class="ti ti-layout-sidebar" aria-hidden="true"></i></button>
+      <div class="path" id="mainPath"><strong>Mis Notas</strong></div>
     </div>
     <div class="content" id="mainContent"></div>
   </div>
 </div>
 
-<!-- Modal: carpeta -->
+<!-- Modal carpeta -->
 <div class="modal-bg" id="folderModal">
   <div class="modal">
     <h3>Nueva carpeta</h3>
@@ -274,7 +305,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   </div>
 </div>
 
-<!-- Modal: cuaderno -->
+<!-- Modal cuaderno -->
 <div class="modal-bg" id="nbModal">
   <div class="modal">
     <h3>Nuevo cuaderno</h3>
@@ -295,167 +326,169 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 </div>
 
 <script>
-const PAL = ['#185FA5','#0F6E56','#993C1D','#993356','#534AB7','#854F0B','#3B6D11'];
+const PAL=['#2979FF','#0F6E56','#D84315','#7B1FA2','#1565C0','#E65100','#2E7D32'];
 
-let S = loadState();
+let S=loadState();
+let STROKES={},TEXTS={};
 
-function loadState() {
-  try {
-    const saved = localStorage.getItem('notasapp_v3');
-    if (saved) return JSON.parse(saved);
-  } catch(e){}
-  return {
-    folders: [
-      {id:'f1',name:'Materias',parentId:null,color:'#185FA5'},
-      {id:'f2',name:'Apuntes rápidos',parentId:null,color:'#0F6E56'},
+function loadState(){
+  try{const s=localStorage.getItem('notasapp_v4');if(s)return JSON.parse(s);}catch(e){}
+  return{
+    folders:[
+      {id:'f1',name:'Documentos',parentId:null,color:'#2979FF'},
+      {id:'f2',name:'Favoritos',parentId:null,color:'#E65100'},
     ],
-    notebooks: [
-      {id:'nb1',folderId:'f1',name:'Mi primer cuaderno',color:'#185FA5',pageType:'grid',pages:1},
+    notebooks:[
+      {id:'nb1',folderId:'f1',name:'Biometría',color:'#2979FF',pageType:'grid',pages:1},
     ],
-    selectedFolder:'f1', openNb:null, currentPage:0, view:'grid',
-    tool:'pen', penColor:'#185FA5', penSize:2,
-    newNbColor:PAL[0], newNbType:'grid',
+    selectedFolder:'f1',openNb:null,currentPage:0,view:'grid',
+    tool:'pen',penColor:'#1c1c1e',penSize:2,
+    newNbColor:PAL[0],newNbType:'grid',
   };
 }
-
-// Strokes y textos separados del estado principal
-let STROKES = {}, TEXTS = {};
-
-function saveState() { try { localStorage.setItem('notasapp_v3', JSON.stringify(S)); } catch(e){} }
-function saveStrokes() {
-  try { localStorage.setItem('notasapp_strokes_v3', JSON.stringify(STROKES)); } catch(e){}
-  try { localStorage.setItem('notasapp_texts_v3', JSON.stringify(TEXTS)); } catch(e){}
+function saveState(){try{localStorage.setItem('notasapp_v4',JSON.stringify(S));}catch(e){}}
+function saveStrokes(){
+  try{localStorage.setItem('notasapp_strokes_v4',JSON.stringify(STROKES));}catch(e){}
+  try{localStorage.setItem('notasapp_texts_v4',JSON.stringify(TEXTS));}catch(e){}
 }
-function loadStrokes() {
-  try { STROKES = JSON.parse(localStorage.getItem('notasapp_strokes_v3') || '{}'); } catch(e){ STROKES={}; }
-  try { TEXTS = JSON.parse(localStorage.getItem('notasapp_texts_v3') || '{}'); } catch(e){ TEXTS={}; }
+function loadStrokes(){
+  try{STROKES=JSON.parse(localStorage.getItem('notasapp_strokes_v4')||'{}');}catch(e){STROKES={};}
+  try{TEXTS=JSON.parse(localStorage.getItem('notasapp_texts_v4')||'{}');}catch(e){TEXTS={};}
 }
-function uid() { return Math.random().toString(36).slice(2,9); }
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function uid(){return Math.random().toString(36).slice(2,9);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-// ── SIDEBAR ──
-function toggleSidebar() {
+function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('overlay').classList.toggle('show');
 }
-function closeSidebar() {
+function closeSidebar(){
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('overlay').classList.remove('show');
 }
 
-// ── RENDER ──
-function render() { renderSidebar(); renderMain(); saveState(); }
+function render(){renderSidebar();renderMain();saveState();}
 
-function renderSidebar() {
-  const el = document.getElementById('folderList');
-  const roots = S.folders.filter(f=>!f.parentId);
-  let h = '';
-  for (const f of roots) {
-    const subs = S.folders.filter(x=>x.parentId===f.id);
-    const cnt = S.notebooks.filter(n=>n.folderId===f.id).length;
-    const act = S.selectedFolder===f.id;
-    h += folderRowHtml(f, cnt, act, false);
-    for (const sf of subs) {
-      const scnt = S.notebooks.filter(n=>n.folderId===sf.id).length;
-      const sact = S.selectedFolder===sf.id;
-      h += folderRowHtml(sf, scnt, sact, true);
+function renderSidebar(){
+  const el=document.getElementById('folderList');
+  const roots=S.folders.filter(f=>!f.parentId);
+  let h=`<div class="sidebar-section">Carpetas</div>`;
+  for(const f of roots){
+    const subs=S.folders.filter(x=>x.parentId===f.id);
+    const cnt=S.notebooks.filter(n=>n.folderId===f.id).length;
+    h+=folderRowHtml(f,cnt,S.selectedFolder===f.id,false);
+    for(const sf of subs){
+      const scnt=S.notebooks.filter(n=>n.folderId===sf.id).length;
+      h+=folderRowHtml(sf,scnt,S.selectedFolder===sf.id,true);
     }
-    h += `<div style="padding-left:36px;padding-bottom:4px;">
+    h+=`<div style="padding-left:40px;padding-bottom:4px;">
       <button class="btn-new" style="font-size:11px;padding:4px 8px;" onclick="openFolderModal('${f.id}')">
         <i class="ti ti-plus" aria-hidden="true"></i> Subcarpeta
       </button></div>`;
   }
-  el.innerHTML = h;
+  el.innerHTML=h;
 }
 
-function folderRowHtml(f, cnt, act, sub) {
-  return `<div class="folder-row${act?' active':''}${sub?' subfolder-row':''}" onclick="selFolder('${f.id}')">
-    <i class="ti ti-folder${act?'-open':''}" style="color:${f.color||'currentColor'}" aria-hidden="true"></i>
+function folderRowHtml(f,cnt,act,sub){
+  const icon=act?'ti-folder-open':'ti-folder';
+  return`<div class="folder-row${act?' active':''}${sub?' subfolder-row':''}" onclick="selFolder('${f.id}')">
+    <i class="ti ${icon}" style="color:${f.color}" aria-hidden="true"></i>
     <span class="fname">${esc(f.name)}</span>
     <span class="fmeta">${cnt}</span>
-    <button class="fdel ibtn" onclick="delFolder(event,'${f.id}')" title="Eliminar"><i class="ti ti-x" aria-hidden="true"></i></button>
+    <button class="fdel" onclick="delFolder(event,'${f.id}')"><i class="ti ti-x"></i></button>
   </div>`;
 }
 
-function renderMain() {
-  if (S.view==='grid') renderGrid();
+function renderMain(){
+  if(S.view==='grid')renderGrid();
   else renderEditor();
 }
 
-function renderGrid() {
-  const folder = S.folders.find(f=>f.id===S.selectedFolder);
-  const nbs = S.notebooks.filter(n=>n.folderId===S.selectedFolder);
-  const parent = folder?.parentId ? S.folders.find(f=>f.id===folder.parentId) : null;
-  const pathHtml = folder
-    ? `${parent?`<span>${esc(parent.name)} / </span>`:''}` + `<strong>${esc(folder.name)}</strong>`
-    : '<strong>Seleccioná una carpeta</strong>';
-  document.getElementById('mainPath').innerHTML = pathHtml;
+function renderGrid(){
+  const folder=S.folders.find(f=>f.id===S.selectedFolder);
+  const nbs=S.notebooks.filter(n=>n.folderId===S.selectedFolder);
+  const parent=folder?.parentId?S.folders.find(f=>f.id===folder.parentId):null;
+  document.getElementById('mainPath').innerHTML=folder
+    ?`${parent?`<span>${esc(parent.name)} / </span>`:''}<strong>${esc(folder.name)}</strong>`
+    :'<strong>Mis Notas</strong>';
 
-  let h = '';
-  if (!folder) {
-    h = `<div class="empty"><i class="ti ti-folder-off"></i><p>Tocá el ícono de carpetas arriba a la izquierda</p></div>`;
-  } else {
-    h = `<div class="grid">`;
-    for (const nb of nbs) {
-      const pages = nb.pages||1;
-      const typeLabel = nb.pageType==='grid'?'Cuadriculada':nb.pageType==='lines'?'Rayada':'En blanco';
-      h += `<div class="nb-card" onclick="openNb('${nb.id}')">
-        <div class="nb-color-bar" style="background:${nb.color}"></div>
-        <div class="nb-thumb" style="background:#fafafa;">
-          ${thumbSVG(nb.pageType, nb.color)}
-          <i class="ti ti-notebook" style="font-size:30px;color:${nb.color};position:relative;z-index:1;" aria-hidden="true"></i>
-          <button class="ibtn nb-del" onclick="delNb(event,'${nb.id}')" title="Eliminar"><i class="ti ti-trash" aria-hidden="true"></i></button>
-        </div>
-        <div class="nb-info">
-          <div class="nb-name">${esc(nb.name)}</div>
-          <div class="nb-sub">${pages} pág · ${typeLabel}</div>
-        </div>
-      </div>`;
-    }
-    h += `<div class="add-card" onclick="openNbModal()">
-      <i class="ti ti-plus" style="font-size:26px;" aria-hidden="true"></i>
-      <span>Nuevo cuaderno</span>
-    </div></div>`;
+  if(!folder){
+    document.getElementById('mainContent').innerHTML=
+      `<div class="empty"><i class="ti ti-layout-sidebar-left-expand"></i>
+      <p>Tocá el ícono de la izquierda para abrir tus carpetas</p></div>`;
+    return;
   }
-  document.getElementById('mainContent').innerHTML = h;
+  let h=`<div class="grid">`;
+  for(const nb of nbs){
+    const pages=nb.pages||1;
+    const lbl=nb.pageType==='grid'?'Cuadriculada':nb.pageType==='lines'?'Rayada':'En blanco';
+    h+=`<div class="nb-card" onclick="openNb('${nb.id}')">
+      <div class="nb-color-bar" style="background:${nb.color}"></div>
+      <div class="nb-thumb">
+        ${thumbSVG(nb.pageType,nb.color)}
+        <i class="ti ti-notebook" style="font-size:32px;color:${nb.color};position:relative;z-index:1;" aria-hidden="true"></i>
+        <button class="ibtn nb-del" onclick="delNb(event,'${nb.id}')"><i class="ti ti-trash"></i></button>
+      </div>
+      <div class="nb-info">
+        <div class="nb-name">${esc(nb.name)}</div>
+        <div class="nb-sub">${pages} pág · ${lbl}</div>
+      </div>
+    </div>`;
+  }
+  h+=`<div class="add-card" onclick="openNbModal()">
+    <i class="ti ti-plus" style="font-size:28px;" aria-hidden="true"></i>
+    <span>Nuevo cuaderno</span>
+  </div></div>`;
+  document.getElementById('mainContent').innerHTML=h;
 }
 
-function thumbSVG(type, color) {
-  if (type==='grid') {
-    let lines='';
-    for(let x=0;x<=145;x+=20) lines+=`<line x1="${x}" y1="0" x2="${x}" y2="110" stroke="${color}" stroke-width="0.6" opacity="0.2"/>`;
-    for(let y=0;y<=110;y+=20) lines+=`<line x1="0" y1="${y}" x2="145" y2="${y}" stroke="${color}" stroke-width="0.6" opacity="0.2"/>`;
-    return `<svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 145 110" xmlns="http://www.w3.org/2000/svg">${lines}</svg>`;
+function thumbSVG(type,color){
+  // Cuadrícula mediana: 20px
+  const GRID=20;
+  if(type==='grid'){
+    let l='';
+    for(let x=0;x<=150;x+=GRID)l+=`<line x1="${x}" y1="0" x2="${x}" y2="115" stroke="${color}" stroke-width="0.5" opacity="0.18"/>`;
+    for(let y=0;y<=115;y+=GRID)l+=`<line x1="0" y1="${y}" x2="150" y2="${y}" stroke="${color}" stroke-width="0.5" opacity="0.18"/>`;
+    return`<svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 150 115" xmlns="http://www.w3.org/2000/svg">${l}</svg>`;
   }
-  if (type==='lines') {
-    let lines='';
-    for(let y=16;y<110;y+=14) lines+=`<line x1="10" y1="${y}" x2="135" y2="${y}" stroke="${color}" stroke-width="0.7" opacity="0.25"/>`;
-    return `<svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 145 110" xmlns="http://www.w3.org/2000/svg">${lines}</svg>`;
+  if(type==='lines'){
+    let l='';
+    for(let y=14;y<115;y+=14)l+=`<line x1="10" y1="${y}" x2="140" y2="${y}" stroke="${color}" stroke-width="0.6" opacity="0.22"/>`;
+    return`<svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 150 115" xmlns="http://www.w3.org/2000/svg">${l}</svg>`;
   }
-  return '';
+  return'';
 }
 
 // ── EDITOR ──
-// Usamos DOS canvas apilados:
-// - bgCanvas: fondo (cuadrícula/rayado) — nunca se toca
-// - drawCanvas: donde van los trazos — el borrador solo afecta esto
-let drawing=false, curStroke=[];
+let drawing=false,curStroke=[],lastX=0,lastY=0;
 
-function renderEditor() {
-  const nb = S.notebooks.find(n=>n.id===S.openNb);
-  if (!nb) { S.view='grid'; renderMain(); return; }
-  const pages = nb.pages||1;
-  const cp = Math.min(S.currentPage, pages-1);
-  document.getElementById('mainPath').innerHTML = `<strong>${esc(nb.name)}</strong>`;
+function renderEditor(){
+  const nb=S.notebooks.find(n=>n.id===S.openNb);
+  if(!nb){S.view='grid';renderMain();return;}
+  const pages=nb.pages||1;
+  const cp=Math.min(S.currentPage,pages-1);
+  document.getElementById('mainPath').innerHTML=`<strong>${esc(nb.name)}</strong>`;
 
-  const colors = ['#185FA5','#0F6E56','#993C1D','#1c1c1e','#A32D2D','#854F0B','#534AB7','#ffffff'];
-  const swatches = colors.map(c=>
-    `<div class="swatch${S.penColor===c?' sel':''}" style="background:${c};${c==='#ffffff'?'border:1px solid var(--border2);':''}" onclick="setPenColor('${c}')" title="${c}"></div>`
+  // Colores de lapicera
+  const PEN_COLORS=[
+    {c:'#1c1c1e',label:'Negro'},
+    {c:'#2979FF',label:'Azul'},
+    {c:'#D84315',label:'Rojo'},
+    {c:'#0F6E56',label:'Verde'},
+    {c:'#7B1FA2',label:'Violeta'},
+    {c:'#E65100',label:'Naranja'},
+    {c:'#ffffff',label:'Blanco'},
+  ];
+  const swatches=PEN_COLORS.map(({c,label})=>
+    `<div class="swatch${S.penColor===c?' sel':''}"
+      style="background:${c};${c==='#ffffff'?'box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);':''}"
+      onclick="setPenColor('${c}')" title="${label}"></div>`
   ).join('');
 
-  document.getElementById('mainContent').innerHTML = `<div class="editor" style="height:calc(100vh - var(--header));height:calc(100dvh - var(--header));">
+  document.getElementById('mainContent').innerHTML=
+  `<div class="editor" style="height:calc(100vh - var(--header));height:calc(100dvh - var(--header));">
     <div class="toolbar">
-      <button class="back-btn" onclick="closeEditor()"><i class="ti ti-arrow-left" aria-hidden="true"></i> Volver</button>
+      <button class="back-btn" onclick="closeEditor()"><i class="ti ti-arrow-left" aria-hidden="true"></i> Atrás</button>
       <div class="tsep"></div>
       <button class="tbtn${S.tool==='pen'?' on':''}" onclick="setTool('pen')" title="Lapicera"><i class="ti ti-pencil" aria-hidden="true"></i></button>
       <button class="tbtn${S.tool==='marker'?' on':''}" onclick="setTool('marker')" title="Marcador"><i class="ti ti-highlight" aria-hidden="true"></i></button>
@@ -464,269 +497,267 @@ function renderEditor() {
       <div class="tsep"></div>
       ${swatches}
       <div class="tsep"></div>
-      <input type="range" min="1" max="18" value="${S.penSize}" oninput="setPenSize(+this.value)" style="width:56px;accent-color:var(--accent);">
+      <input type="range" min="1" max="16" value="${S.penSize}"
+        oninput="setPenSize(+this.value)"
+        style="width:60px;accent-color:var(--accent);cursor:pointer;">
       <span class="sz-label">${S.penSize}</span>
       <div class="tsep"></div>
       <button class="tbtn" onclick="undoStroke()" title="Deshacer"><i class="ti ti-arrow-back-up" aria-hidden="true"></i></button>
       <button class="tbtn" onclick="clearPage()" title="Limpiar trazos"><i class="ti ti-trash" aria-hidden="true"></i></button>
       <div class="page-nav">
         <button onclick="prevPage()"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
-        <span>${cp+1}/${pages}</span>
+        <span>${cp+1} / ${pages}</span>
         <button onclick="nextPage()"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
-        <button class="ibtn" onclick="addPage()" title="Nueva página"><i class="ti ti-file-plus" aria-hidden="true"></i></button>
+        <button class="ibtn" style="color:rgba(255,255,255,0.6);" onclick="addPage()" title="Nueva página">
+          <i class="ti ti-file-plus" aria-hidden="true"></i>
+        </button>
       </div>
     </div>
+
     <div class="canvas-wrap" id="canvasWrap">
-      <div class="page" id="pageContainer" style="position:relative;">
-        <!-- Canvas del fondo (cuadrícula/rayado) — nunca se borra -->
-        <canvas id="bgCanvas" style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
-        <!-- Canvas de dibujo — encima del fondo -->
+      <div class="page-container" id="pageContainer">
+        <canvas id="bgCanvas"></canvas>
         <canvas id="drawCanvas"></canvas>
       </div>
     </div>
+
     <div class="export-bar">
       <button class="ebtn" onclick="exportPNG()"><i class="ti ti-photo" aria-hidden="true"></i> PNG</button>
       <button class="ebtn primary" onclick="exportPDF()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> Exportar PDF</button>
-      <div class="pencil-badge"><i class="ti ti-pencil" aria-hidden="true"></i> Solo Apple Pencil dibuja</div>
-      <div class="sync"><i class="ti ti-cloud-check" aria-hidden="true"></i> Guardado</div>
+      <div class="pencil-only"><i class="ti ti-pencil" aria-hidden="true"></i> Solo Apple Pencil dibuja</div>
+      <div class="sync-dot"><i class="ti ti-circle-check" aria-hidden="true"></i> Guardado</div>
     </div>
   </div>`;
 
-  setupCanvas(nb, cp);
+  setupCanvas(nb,cp);
 }
 
-function setupCanvas(nb, pageIndex) {
-  const wrap = document.getElementById('canvasWrap');
-  const container = document.getElementById('pageContainer');
-  const bgCanvas = document.getElementById('bgCanvas');
-  const drawCanvas = document.getElementById('drawCanvas');
-  if (!drawCanvas) return;
+function setupCanvas(nb,pageIndex){
+  const wrap=document.getElementById('canvasWrap');
+  const container=document.getElementById('pageContainer');
+  const bg=document.getElementById('bgCanvas');
+  const draw=document.getElementById('drawCanvas');
+  if(!draw)return;
 
-  const maxW = Math.min(wrap.clientWidth - 32, 900);
-  const W = maxW;
-  const H = Math.round(W * 1.414);
+  // Tamaño: ancho casi completo, proporción A4
+  const maxW=Math.min(wrap.clientWidth-40,1000);
+  const W=maxW, H=Math.round(W*1.414);
 
-  // Configurar ambos canvas con el mismo tamaño
-  [bgCanvas, drawCanvas].forEach(c => {
-    c.width = W; c.height = H;
-    c.style.width = W + 'px'; c.style.height = H + 'px';
+  [bg,draw].forEach(c=>{
+    c.width=W;c.height=H;
+    c.style.width=W+'px';c.style.height=H+'px';
   });
-  container.style.width = W + 'px';
-  container.style.height = H + 'px';
+  container.style.width=W+'px';container.style.height=H+'px';
+  bg.style.position='absolute';bg.style.top='0';bg.style.left='0';
 
-  // Fondo: cuadrícula/rayado en bgCanvas (permanente)
-  const bgCtx = bgCanvas.getContext('2d');
-  bgCtx.fillStyle = 'white';
+  // Pintar fondo blanco + cuadrícula en bgCanvas
+  const bgCtx=bg.getContext('2d');
+  bgCtx.fillStyle='#ffffff';
   bgCtx.fillRect(0,0,W,H);
-  drawBg(bgCtx, nb.pageType, W, H);
+  drawBg(bgCtx,nb.pageType,W,H);
 
-  // Trazos guardados en drawCanvas
-  const drawCtx = drawCanvas.getContext('2d');
+  // Replay trazos en drawCanvas
+  const drawCtx=draw.getContext('2d');
   drawCtx.clearRect(0,0,W,H);
-  const key = `${nb.id}_p${pageIndex}`;
-  if (STROKES[key]) replayStrokes(drawCtx, STROKES[key]);
-  if (TEXTS[key]) { for (const t of TEXTS[key]) drawText(drawCtx, t); }
+  const key=`${nb.id}_p${pageIndex}`;
+  if(STROKES[key])replayStrokes(drawCtx,STROKES[key]);
+  if(TEXTS[key])for(const t of TEXTS[key])drawText(drawCtx,t);
 
-  // Solo el drawCanvas recibe eventos de puntero
-  drawCanvas.addEventListener('pointerdown', onDown);
-  drawCanvas.addEventListener('pointermove', onMove);
-  drawCanvas.addEventListener('pointerup', onUp);
-  drawCanvas.addEventListener('pointercancel', onUp);
-  drawCanvas.addEventListener('click', onTextClick);
+  // Eventos solo en drawCanvas
+  draw.addEventListener('pointerdown',onDown);
+  draw.addEventListener('pointermove',onMove);
+  draw.addEventListener('pointerup',onUp);
+  draw.addEventListener('pointercancel',onUp);
+  draw.addEventListener('click',onTextClick);
 }
 
-function drawBg(ctx, type, W, H) {
+// Cuadrícula mediana: 28px (cuaderno escolar)
+function drawBg(ctx,type,W,H){
   ctx.save();
-  if (type==='grid') {
-    const step = Math.round(W / 35);
-    ctx.strokeStyle='rgba(100,120,210,0.18)'; ctx.lineWidth=0.5;
+  if(type==='grid'){
+    const step=28;
+    ctx.strokeStyle='rgba(100,120,200,0.13)';ctx.lineWidth=0.5;
     for(let x=0;x<=W;x+=step){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
     for(let y=0;y<=H;y+=step){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-  } else if (type==='lines') {
-    const step = Math.round(H/32);
-    ctx.strokeStyle='rgba(100,120,210,0.2)'; ctx.lineWidth=0.7;
-    for(let y=step;y<H;y+=step){ctx.beginPath();ctx.moveTo(Math.round(W*0.08),y);ctx.lineTo(W-10,y);ctx.stroke();}
-    ctx.strokeStyle='rgba(200,80,80,0.2)'; ctx.lineWidth=1;
-    const lx=Math.round(W*0.12);
+  }else if(type==='lines'){
+    const step=28;
+    ctx.strokeStyle='rgba(100,120,200,0.18)';ctx.lineWidth=0.6;
+    for(let y=step;y<H;y+=step){
+      ctx.beginPath();ctx.moveTo(Math.round(W*0.07),y);ctx.lineTo(W-12,y);ctx.stroke();
+    }
+    ctx.strokeStyle='rgba(200,80,80,0.18)';ctx.lineWidth=0.8;
+    const lx=Math.round(W*0.1);
     ctx.beginPath();ctx.moveTo(lx,0);ctx.lineTo(lx,H);ctx.stroke();
   }
   ctx.restore();
 }
 
-function replayStrokes(ctx, strokes) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  for (const s of strokes) {
-    if (!s||!s.length) continue;
-    applyStyle(ctx, s[0]);
-    ctx.beginPath(); ctx.moveTo(s[0].x, s[0].y);
-    for (let i=1;i<s.length;i++) ctx.lineTo(s[i].x, s[i].y);
+function replayStrokes(ctx,strokes){
+  ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+  for(const s of strokes){
+    if(!s||s.length<2)continue;
+    applyStyle(ctx,s[0]);
+    ctx.beginPath();ctx.moveTo(s[0].x,s[0].y);
+    for(let i=1;i<s.length;i++)ctx.lineTo(s[i].x,s[i].y);
     ctx.stroke();
   }
   ctx.globalCompositeOperation='source-over';
 }
 
-function applyStyle(ctx, f) {
-  if (f.tool==='eraser') {
-    // El borrador solo borra el drawCanvas, nunca toca el bgCanvas
+function applyStyle(ctx,f){
+  if(f.tool==='eraser'){
     ctx.globalCompositeOperation='destination-out';
     ctx.strokeStyle='rgba(0,0,0,1)';
-    ctx.lineWidth=f.size*5;
-  } else if (f.tool==='marker') {
+    ctx.lineWidth=f.size*6;
+  }else if(f.tool==='marker'){
     ctx.globalCompositeOperation='source-over';
-    ctx.strokeStyle=f.color+'60';
-    ctx.lineWidth=f.size*3;
-  } else {
+    ctx.strokeStyle=f.color+'55';
+    ctx.lineWidth=f.size*4;
+  }else{
+    // Lapicera: trazo suave con presión simulada
     ctx.globalCompositeOperation='source-over';
     ctx.strokeStyle=f.color;
     ctx.lineWidth=f.size;
   }
-  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.lineCap='round';ctx.lineJoin='round';
+  // Suavizado para trazo limpio
+  ctx.imageSmoothingEnabled=true;
+  ctx.imageSmoothingQuality='high';
 }
 
-function drawText(ctx, t) {
+function drawText(ctx,t){
   ctx.globalCompositeOperation='source-over';
-  ctx.font=`${t.size||16}px -apple-system,sans-serif`;
+  ctx.font=`${t.size||18}px -apple-system,sans-serif`;
   ctx.fillStyle=t.color;
-  ctx.fillText(t.text, t.x, t.y);
+  ctx.fillText(t.text,t.x,t.y);
 }
 
-function getXY(e) {
-  const c=e.target, r=c.getBoundingClientRect();
-  const sx=c.width/r.width, sy=c.height/r.height;
-  return {x:(e.clientX-r.left)*sx, y:(e.clientY-r.top)*sy};
+function getXY(e){
+  const c=e.target,r=c.getBoundingClientRect();
+  const sx=c.width/r.width,sy=c.height/r.height;
+  return{x:(e.clientX-r.left)*sx,y:(e.clientY-r.top)*sy};
 }
 
-// ── DIBUJO: solo lápiz óptico (pointerType === 'pen') ──
-// Los dedos (pointerType === 'touch') NO dibujan — solo hacen scroll
-function onDown(e) {
-  // Ignorar dedos — solo Apple Pencil ('pen') y mouse ('mouse')
-  if (e.pointerType === 'touch') return;
-  if (S.tool==='text') return;
-  drawing=true; curStroke=[];
+// ── SOLO APPLE PENCIL DIBUJA ──
+// pointerType === 'pen' → Apple Pencil
+// pointerType === 'touch' → dedo (ignorado para dibujo)
+// pointerType === 'mouse' → mouse en PC (permitido)
+function isPen(e){return e.pointerType==='pen'||e.pointerType==='mouse';}
+
+function onDown(e){
+  if(!isPen(e))return;
+  if(S.tool==='text')return;
+  drawing=true;curStroke=[];
   const p=getXY(e);
-  const first={...p, tool:S.tool, color:S.penColor, size:S.penSize};
+  const first={...p,tool:S.tool,color:S.penColor,size:S.penSize};
   curStroke.push(first);
   const ctx=e.target.getContext('2d');
   applyStyle(ctx,first);
-  ctx.beginPath(); ctx.moveTo(p.x,p.y);
+  ctx.beginPath();ctx.moveTo(p.x,p.y);
   e.target.setPointerCapture(e.pointerId);
   e.preventDefault();
 }
-function onMove(e) {
-  if (e.pointerType === 'touch') return;
-  if (!drawing) return;
+function onMove(e){
+  if(!isPen(e)||!drawing)return;
   const p=getXY(e);
   const ctx=e.target.getContext('2d');
-  ctx.lineTo(p.x,p.y); ctx.stroke();
+  // Curvas suaves con quadraticCurveTo para trazo más limpio
+  if(curStroke.length>1){
+    const prev=curStroke[curStroke.length-1];
+    const midX=(prev.x+p.x)/2, midY=(prev.y+p.y)/2;
+    ctx.quadraticCurveTo(prev.x,prev.y,midX,midY);
+    ctx.stroke();
+    ctx.beginPath();ctx.moveTo(midX,midY);
+  }else{
+    ctx.lineTo(p.x,p.y);ctx.stroke();
+  }
   curStroke.push({x:p.x,y:p.y});
   e.preventDefault();
 }
-function onUp(e) {
-  if (e.pointerType === 'touch') return;
-  if (!drawing) return;
+function onUp(e){
+  if(!isPen(e)||!drawing)return;
   drawing=false;
-  if (curStroke.length<2) return;
+  if(curStroke.length<2)return;
   const nb=S.notebooks.find(n=>n.id===S.openNb);
   const key=`${nb.id}_p${S.currentPage}`;
-  if (!STROKES[key]) STROKES[key]=[];
+  if(!STROKES[key])STROKES[key]=[];
   STROKES[key].push([...curStroke]);
   curStroke=[];
   saveStrokes();
 }
-
-function onTextClick(e) {
-  // Texto se puede agregar con dedo también (es un tap, no un arrastre)
-  if (S.tool!=='text') return;
+function onTextClick(e){
+  if(S.tool!=='text')return;
   const p=getXY(e);
   const text=prompt('Escribí el texto:');
-  if (!text) return;
+  if(!text)return;
   const nb=S.notebooks.find(n=>n.id===S.openNb);
   const key=`${nb.id}_p${S.currentPage}`;
-  if (!TEXTS[key]) TEXTS[key]=[];
-  const t={x:p.x, y:p.y, text, color:S.penColor, size:S.penSize+14};
+  if(!TEXTS[key])TEXTS[key]=[];
+  const t={x:p.x,y:p.y,text,color:S.penColor,size:S.penSize+16};
   TEXTS[key].push(t);
-  const ctx=e.target.getContext('2d');
-  drawText(ctx,t);
+  drawText(e.target.getContext('2d'),t);
   saveStrokes();
 }
 
-function undoStroke() {
+function undoStroke(){
   const nb=S.notebooks.find(n=>n.id===S.openNb);
   const key=`${nb.id}_p${S.currentPage}`;
-  if (STROKES[key]&&STROKES[key].length) {
-    STROKES[key].pop();
-    saveStrokes();
-    redrawCanvas(nb,S.currentPage);
-  }
+  if(STROKES[key]?.length){STROKES[key].pop();saveStrokes();redrawCanvas(nb,S.currentPage);}
 }
-
-function clearPage() {
-  if (!confirm('¿Limpiar los trazos de esta página? La cuadrícula se mantiene.')) return;
+function clearPage(){
+  if(!confirm('¿Limpiar los trazos? La cuadrícula se mantiene.'))return;
   const nb=S.notebooks.find(n=>n.id===S.openNb);
   const key=`${nb.id}_p${S.currentPage}`;
-  STROKES[key]=[]; TEXTS[key]=[];
-  saveStrokes();
-  redrawCanvas(nb,S.currentPage);
+  STROKES[key]=[];TEXTS[key]=[];saveStrokes();redrawCanvas(nb,S.currentPage);
 }
-
-function redrawCanvas(nb, pageIndex) {
-  const drawCanvas=document.getElementById('drawCanvas');
-  if (!drawCanvas) return;
-  const ctx=drawCanvas.getContext('2d');
+function redrawCanvas(nb,pageIndex){
+  const draw=document.getElementById('drawCanvas');
+  if(!draw)return;
+  const ctx=draw.getContext('2d');
   ctx.globalCompositeOperation='source-over';
-  ctx.clearRect(0,0,drawCanvas.width,drawCanvas.height);
-  replayStrokes(ctx, STROKES[`${nb.id}_p${pageIndex}`]||[]);
-  if (TEXTS[`${nb.id}_p${pageIndex}`]) {
-    for (const t of TEXTS[`${nb.id}_p${pageIndex}`]) drawText(ctx,t);
-  }
+  ctx.clearRect(0,0,draw.width,draw.height);
+  replayStrokes(ctx,STROKES[`${nb.id}_p${pageIndex}`]||[]);
+  if(TEXTS[`${nb.id}_p${pageIndex}`])for(const t of TEXTS[`${nb.id}_p${pageIndex}`])drawText(ctx,t);
 }
 
-function setTool(t) { S.tool=t; saveState(); renderEditor(); }
-function setPenColor(c) { S.penColor=c; saveState(); renderEditor(); }
-function setPenSize(v) { S.penSize=v; const el=document.querySelector('.sz-label'); if(el) el.textContent=v; }
+function setTool(t){S.tool=t;saveState();renderEditor();}
+function setPenColor(c){S.penColor=c;saveState();renderEditor();}
+function setPenSize(v){S.penSize=v;const el=document.querySelector('.sz-label');if(el)el.textContent=v;}
 
-function addPage() {
+function addPage(){
   const nb=S.notebooks.find(n=>n.id===S.openNb);
-  nb.pages=(nb.pages||1)+1;
-  S.currentPage=nb.pages-1;
-  saveState();renderEditor();
+  nb.pages=(nb.pages||1)+1;S.currentPage=nb.pages-1;saveState();renderEditor();
 }
-function prevPage() { if (S.currentPage>0){S.currentPage--;saveState();renderEditor();} }
-function nextPage() {
+function prevPage(){if(S.currentPage>0){S.currentPage--;saveState();renderEditor();}}
+function nextPage(){
   const nb=S.notebooks.find(n=>n.id===S.openNb);
-  if (S.currentPage<(nb.pages||1)-1){S.currentPage++;saveState();renderEditor();}
+  if(S.currentPage<(nb.pages||1)-1){S.currentPage++;saveState();renderEditor();}
 }
 
-// Exportar: combina bgCanvas + drawCanvas en un canvas temporal
-function getMergedCanvas() {
+function getMergedCanvas(){
   const bg=document.getElementById('bgCanvas');
   const draw=document.getElementById('drawCanvas');
-  if (!bg||!draw) return null;
+  if(!bg||!draw)return null;
   const tmp=document.createElement('canvas');
-  tmp.width=bg.width; tmp.height=bg.height;
+  tmp.width=bg.width;tmp.height=bg.height;
   const ctx=tmp.getContext('2d');
-  ctx.drawImage(bg,0,0);
-  ctx.drawImage(draw,0,0);
+  ctx.drawImage(bg,0,0);ctx.drawImage(draw,0,0);
   return tmp;
 }
-
-function exportPNG() {
-  const tmp=getMergedCanvas(); if(!tmp) return;
+function exportPNG(){
+  const tmp=getMergedCanvas();if(!tmp)return;
   const nb=S.notebooks.find(n=>n.id===S.openNb);
   const a=document.createElement('a');
-  a.download=`${nb.name}-pagina${S.currentPage+1}.png`;
-  a.href=tmp.toDataURL('image/png');
-  a.click();
+  a.download=`${nb.name}-p${S.currentPage+1}.png`;
+  a.href=tmp.toDataURL('image/png');a.click();
 }
-
-function exportPDF() {
-  const tmp=getMergedCanvas();
-  if (!tmp){alert('Abrí un cuaderno primero');return;}
+function exportPDF(){
+  const tmp=getMergedCanvas();if(!tmp){alert('Abrí un cuaderno primero');return;}
   const nb=S.notebooks.find(n=>n.id===S.openNb);
   const scr=document.createElement('script');
   scr.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
   scr.onload=function(){
-    const {jsPDF}=window.jspdf;
+    const{jsPDF}=window.jspdf;
     const W=tmp.width,H=tmp.height;
     const doc=new jsPDF({orientation:H>W?'portrait':'landscape',unit:'px',format:[W,H]});
     doc.addImage(tmp.toDataURL('image/png'),'PNG',0,0,W,H);
@@ -735,38 +766,37 @@ function exportPDF() {
   document.head.appendChild(scr);
 }
 
-function openNb(id) {
-  S.openNb=id; S.currentPage=0; S.view='editor'; S.tool='pen';
-  closeSidebar(); saveState(); renderMain();
+function openNb(id){
+  S.openNb=id;S.currentPage=0;S.view='editor';S.tool='pen';
+  closeSidebar();saveState();renderMain();
 }
-function closeEditor() { S.view='grid'; S.openNb=null; saveState(); renderMain(); }
-function selFolder(id) {
-  S.selectedFolder=id; S.view='grid'; S.openNb=null;
-  closeSidebar(); saveState(); render();
+function closeEditor(){S.view='grid';S.openNb=null;saveState();renderMain();}
+function selFolder(id){
+  S.selectedFolder=id;S.view='grid';S.openNb=null;
+  closeSidebar();saveState();render();
 }
-function delFolder(e,id) {
+function delFolder(e,id){
   e.stopPropagation();
-  if (!confirm('¿Eliminar carpeta y sus cuadernos?')) return;
+  if(!confirm('¿Eliminar carpeta y sus cuadernos?'))return;
   S.folders=S.folders.filter(f=>f.id!==id&&f.parentId!==id);
   S.notebooks=S.notebooks.filter(n=>n.folderId!==id);
-  if (S.selectedFolder===id) S.selectedFolder=S.folders[0]?.id||null;
+  if(S.selectedFolder===id)S.selectedFolder=S.folders[0]?.id||null;
   saveState();render();
 }
-function delNb(e,id) {
+function delNb(e,id){
   e.stopPropagation();
-  if (!confirm('¿Eliminar cuaderno?')) return;
+  if(!confirm('¿Eliminar cuaderno?'))return;
   S.notebooks=S.notebooks.filter(n=>n.id!==id);
   saveState();render();
 }
 
-// ── FOLDER MODAL ──
-function openFolderModal(parentId) {
+function openFolderModal(parentId){
   const sel=document.getElementById('parentSel');
   sel.innerHTML='<option value="">— Raíz —</option>';
   S.folders.filter(f=>!f.parentId).forEach(f=>{
     const o=document.createElement('option');
-    o.value=f.id; o.textContent=f.name;
-    if (parentId===f.id) o.selected=true;
+    o.value=f.id;o.textContent=f.name;
+    if(parentId===f.id)o.selected=true;
     sel.appendChild(o);
   });
   document.getElementById('folderName').value='';
@@ -775,17 +805,15 @@ function openFolderModal(parentId) {
 }
 function closeFolderModal(){document.getElementById('folderModal').classList.remove('open');}
 function confirmFolder(){
-  const name=document.getElementById('folderName').value.trim();
-  if (!name) return;
+  const name=document.getElementById('folderName').value.trim();if(!name)return;
   const parentId=document.getElementById('parentSel').value||null;
   S.folders.push({id:uid(),name,parentId,color:PAL[S.folders.length%PAL.length]});
   closeFolderModal();render();
 }
 
-// ── NB MODAL ──
 function openNbModal(){
-  if (!S.selectedFolder){alert('Primero seleccioná una carpeta');return;}
-  S.newNbColor=PAL[0]; S.newNbType='grid';
+  if(!S.selectedFolder){alert('Seleccioná una carpeta primero');return;}
+  S.newNbColor=PAL[0];S.newNbType='grid';
   document.getElementById('nbName').value='';
   document.getElementById('nbColors').innerHTML=PAL.map((c,i)=>
     `<div class="c-opt${i===0?' sel':''}" style="background:${c}" onclick="selNbColor(this,'${c}')"></div>`
@@ -806,16 +834,14 @@ function selPtype(el){
   el.classList.add('sel');
 }
 function confirmNb(){
-  const name=document.getElementById('nbName').value.trim();
-  if (!name) return;
+  const name=document.getElementById('nbName').value.trim();if(!name)return;
   S.notebooks.push({id:uid(),folderId:S.selectedFolder,name,color:S.newNbColor,pageType:S.newNbType,pages:1});
   closeNbModal();saveState();render();
 }
 
-// ── INIT ──
 loadStrokes();
 render();
-if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 </script>
 </body>
 </html>

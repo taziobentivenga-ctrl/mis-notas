@@ -344,13 +344,18 @@ function thumbSVG(type){
 const PAGE_W=1000, PAGE_H=1414;   // resolución interna de la hoja (fija)
 
 let view={scale:1, tx:0, ty:0};   // transform del plano
-let drawing=false, curStroke=[], drawCtx=null, drawingPointerId=null;
+let drawing=false, curStroke=[], drawCtx=null, drawingPointerId=null, panning=null;
 let penSeen=false;                 // ¿se detectó Apple Pencil?
 let penMode='auto';                // auto | pen-only | allow-touch
 
 // Estado de gestos táctiles (dedos)
 let activeTouches=new Map();
 let gestureStart=null;
+
+function showDebug(msg){
+  const el=document.getElementById('debugPanel');
+  if(el)el.textContent=msg;
+}
 
 function renderEditor(){
   const nb=S.notebooks.find(n=>n.id===S.openNb);
@@ -372,6 +377,7 @@ function renderEditor(){
       <button class="tbtn${S.tool==='marker'?' on':''}" onclick="setTool('marker')" title="Marcador"><i class="ti ti-highlight"></i></button>
       <button class="tbtn${S.tool==='eraser'?' on':''}" onclick="setTool('eraser')" title="Borrador"><i class="ti ti-eraser"></i></button>
       <button class="tbtn${S.tool==='text'?' on':''}" onclick="setTool('text')" title="Texto"><i class="ti ti-cursor-text"></i></button>
+      <button class="tbtn${S.tool==='hand'?' on':''}" onclick="setTool('hand')" title="Mano (mover/arrastrar)"><i class="ti ti-hand-stop"></i></button>
       <div class="tsep"></div>
       ${swatches}
       <div class="tsep"></div>
@@ -390,13 +396,14 @@ function renderEditor(){
       </div>
     </div>
 
-    <div class="canvas-viewport" id="viewport">
+    <div class="canvas-viewport" id="viewport" style="cursor:${S.tool==='hand'?'grab':S.tool==='text'?'text':'crosshair'};">
       <div class="canvas-plane" id="plane">
         <div class="page-container" id="pageContainer" style="width:${PAGE_W}px;height:${PAGE_H}px;">
           <canvas id="bgCanvas" width="${PAGE_W}" height="${PAGE_H}"></canvas>
           <canvas id="drawCanvas" width="${PAGE_W}" height="${PAGE_H}"></canvas>
         </div>
       </div>
+      <div id="debugPanel" style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);color:#0f0;font-family:monospace;font-size:11px;padding:4px 8px;border-radius:6px;pointer-events:none;z-index:5;max-width:90%;">esperando toque...</div>
     </div>
 
     <div class="export-bar">
@@ -493,6 +500,17 @@ function isDrawingPointer(e){
 }
 
 function onPointerDown(e){
+  // Diagnóstico visible
+  showDebug(`down: ${e.pointerType} | tool: ${S.tool} | scale: ${view.scale.toFixed(2)}`);
+
+  // HERRAMIENTA MANO: arrastrar el lienzo con cualquier puntero
+  if(S.tool==='hand'){
+    e.preventDefault();
+    panning={x:e.clientX,y:e.clientY,tx:view.tx,ty:view.ty};
+    try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}
+    return;
+  }
+
   // TEXTO: tap simple
   if(S.tool==='text' && e.pointerType!=='touch'){
     const p=screenToPage(e.clientX,e.clientY);
@@ -520,6 +538,15 @@ function onPointerDown(e){
 }
 
 function onPointerMove(e){
+  // HERRAMIENTA MANO: arrastrar
+  if(panning){
+    e.preventDefault();
+    view.tx=panning.tx+(e.clientX-panning.x);
+    view.ty=panning.ty+(e.clientY-panning.y);
+    applyTransform();
+    return;
+  }
+
   if(drawing && isDrawingPointer(e)){
     e.preventDefault();
     const p=screenToPage(e.clientX,e.clientY);
@@ -541,6 +568,9 @@ function onPointerMove(e){
 }
 
 function onPointerUp(e){
+  // Fin de herramienta mano
+  if(panning){ panning=null; return; }
+
   if(drawing && (e.pointerType==='pen'||e.pointerType==='mouse'||(e.pointerType==='touch'&&!penSeen&&penMode!=='pen-only'))){
     drawing=false;
     if(curStroke.length>=2){

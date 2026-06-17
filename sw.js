@@ -1,5 +1,5 @@
 // Cambiar este número cada vez que se actualiza la app fuerza la recarga
-const CACHE = 'notas-v5';
+const CACHE = 'notas-v8';
 const ASSETS = [
   './',
   './index.html',
